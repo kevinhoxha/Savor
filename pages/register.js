@@ -38,6 +38,7 @@ function RegisterPage() {
 				// Handle and display error messages to the user.
 				console.log("error", error);
 			}
+            router.push("/login");
 		} else if (accountType === "Restaurant Owner") {
 			// Redirect to registerrestaurant page for additional information
 			router.push("/register-restaurant");

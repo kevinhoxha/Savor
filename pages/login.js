@@ -1,29 +1,32 @@
 // pages/login.js
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native-web';
-import { loginUser } from '../utils/firebaseUtils';
+import React, { useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { StyleSheet, Text, View, TextInput, Button } from "react-native-web";
+import { loginUser } from "../utils/firebaseUtils";
 
 function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+
   const handleLogin = async () => {
     try {
       const userData = {
         email,
-        password
+        password,
       };
-      
+
       const response = await loginUser(userData);
-  
+
       if (response.user) {
-        if (response.accountType === 'Diner') {
-          // Handle diner specific logic or redirection.
+        if (response.accountType === "Diner") {
           console.log(`successfully logged in user: ${response.user.uid}`);
-        } else if (response.accountType === 'Restaurant Owner') {
+          router.push("/userdash");
+        } else if (response.accountType === "Restaurant Owner") {
           // Handle restaurant owner specific logic or redirection.
+          router.push("/ownerdash");
         }
       }
     } catch (error) {
@@ -68,8 +71,8 @@ function LoginPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   title: {
@@ -77,7 +80,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: '100%',
+    width: "100%",
     padding: 10,
     marginBottom: 10,
     borderWidth: 1,
@@ -86,12 +89,12 @@ const styles = StyleSheet.create({
   linksContainer: {
     marginTop: 20,
     marginBottom: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   linkText: {
     marginTop: 10,
-    color: 'blue',
+    color: "blue",
   },
 });
 
