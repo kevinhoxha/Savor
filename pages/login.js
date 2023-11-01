@@ -67,6 +67,9 @@ const styles = StyleSheet.create({
   },
   linksContainer: {
     marginTop: 20,
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   linkText: {
     marginTop: 10,

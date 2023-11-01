@@ -19,7 +19,7 @@ function RegisterPage() {
       // e.g., API call to backend
     } else if (accountType === 'Restaurant Owner') {
       // Redirect to registerrestaurant page for additional information
-      router.push('/registerrestaurant');
+      router.push('/register-restaurant');
     }
   };
 
