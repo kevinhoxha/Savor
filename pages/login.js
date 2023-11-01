@@ -3,14 +3,32 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native-web';
+import { loginUser } from '../utils/firebaseUtils';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    // Logic to handle login
-    // e.g., API call to backend
+  
+  const handleLogin = async () => {
+    try {
+      const userData = {
+        email,
+        password
+      };
+      
+      const response = await loginUser(userData);
+  
+      if (response.user) {
+        if (response.accountType === 'Diner') {
+          // Handle diner specific logic or redirection.
+          console.log(`successfully logged in user: ${response.user.uid}`);
+        } else if (response.accountType === 'Restaurant Owner') {
+          // Handle restaurant owner specific logic or redirection.
+        }
+      }
+    } catch (error) {
+      // Handle and display error messages to the user.
+    }
   };
 
   return (
