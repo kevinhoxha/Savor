@@ -3,9 +3,14 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native-web';
 import Link from 'next/link';
+import { useAuth } from "../context/AuthContext";
 
 function ReservationsPage() {
   const [location, setLocation] = useState('');
+  const { currentUser, userDetails } = useAuth();
+
+  console.log(currentUser)
+  console.log(userDetails)
 
   // Sample hardcoded restaurant data
   const restaurants = [

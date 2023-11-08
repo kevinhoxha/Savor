@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native-web';
+import { useAuth } from "../context/AuthContext";
 
 function RegisterRestaurantPage() {
   const [restaurantName, setRestaurantName] = useState('');
   const [address, setAddress] = useState('');
   const [cuisine, setCuisine] = useState('');
+  const { currentUser, userDetails } = useAuth();
 
   const handleFinishRegistration = () => {
     // Logic to handle registration for Restaurant Owners

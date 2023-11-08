@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase"; // Re-import these
+import { auth, db } from "./firebase";
 import {
 	signInWithEmailAndPassword,
 	createUserWithEmailAndPassword,
@@ -24,10 +24,11 @@ export const registerUser = async ({
 		// Save additional user details in Firestore
 		const userRef = doc(db, "users", user.uid);
 		await setDoc(userRef, {
+			email,
 			firstName,
 			lastName,
 			phone,
-			accountType, // 'Diner' or 'Restaurant Owner'
+			accountType,
 		});
 
 		return { user };
@@ -51,7 +52,7 @@ export const loginUser = async ({ email, password }) => {
 		const userDoc = await getDoc(userRef); // Adjusted this
 		const userDetails = userDoc.data();
 
-		return { user, accountType: userDetails.accountType };
+		return { user, userDetails: userDetails };
 	} catch (error) {
 		console.error("Error logging in:", error.message);
 		throw error;

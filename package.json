@@ -1,16 +1,16 @@
 {
-  "private": true,
-  "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "@firebase/firestore": "^4.3.2",
-    "firebase": "^10.5.2",
-    "next": "latest",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-native-web": "^0.18.9"
-  }
+	"private": true,
+	"scripts": {
+		"dev": "next",
+		"build": "next build",
+		"start": "next start"
+	},
+	"dependencies": {
+		"@firebase/firestore": "^4.3.2",
+		"firebase": "^10.5.2",
+		"next": "latest",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-native-web": "^0.18.9"
+	}
 }

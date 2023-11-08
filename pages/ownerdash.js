@@ -1,11 +1,11 @@
-// pages/restaurantDashboard.js
-
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native-web';
 import Link from 'next/link';
+import { useAuth } from "../context/AuthContext";
 
 function RestaurantDashboard() {
   const [currentRestaurant, setCurrentRestaurant] = useState('Pasta Palace');
+  const { currentUser, userDetails } = useAuth();
 
   // Hardcoded restaurant data
   const restaurants = ['Pasta Palace', 'Sushi Central'];

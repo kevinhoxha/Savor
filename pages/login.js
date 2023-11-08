@@ -1,36 +1,32 @@
-// pages/login.js
+// "use client"
 
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { StyleSheet, Text, View, TextInput, Button } from "react-native-web";
-import { loginUser } from "../utils/firebaseUtils";
+import { useAuth } from "../context/AuthContext";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { handleLogin, userDetails } = useAuth();
   const router = useRouter();
 
-  const handleLogin = async () => {
+  // This function will be triggered when the login button is pressed
+  const onLoginPress = async () => {
     try {
-      const userData = {
-        email,
-        password,
-      };
+      await handleLogin(email, password); // Use the handleLogin method from AuthContext
 
-      const response = await loginUser(userData);
-
-      if (response.user) {
-        if (response.accountType === "Diner") {
-          console.log(`successfully logged in user: ${response.user.uid}`);
-          router.push("/userdash");
-        } else if (response.accountType === "Restaurant Owner") {
-          // Handle restaurant owner specific logic or redirection.
-          router.push("/ownerdash");
-        }
+      print(userDetails)
+      // Redirect based on accountType which should now be updated in context
+      if (userDetails.accountType === "Diner") {
+        router.push("/userdash");
+      } else if (userDetails.accountType === "Restaurant Owner") {
+        router.push("/ownerdash");
       }
     } catch (error) {
       // Handle and display error messages to the user.
+      console.error("Login error:", error.message);
     }
   };
 
@@ -54,7 +50,7 @@ function LoginPage() {
         secureTextEntry
       />
 
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Login" onPress={onLoginPress} />
 
       <View style={styles.linksContainer}>
         <Link href="/forgot-password">
