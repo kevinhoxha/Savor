@@ -3,7 +3,7 @@ import {
 	signInWithEmailAndPassword,
 	createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, collection } from "firebase/firestore";
+import { doc, setDoc, addDoc, getDoc, collection } from "firebase/firestore";
 
 export const registerUser = async ({
 	email,
@@ -52,9 +52,27 @@ export const loginUser = async ({ email, password }) => {
 		const userDoc = await getDoc(userRef); // Adjusted this
 		const userDetails = userDoc.data();
 
-		return { user, userDetails: userDetails };
+		return { user, userDetails };
 	} catch (error) {
 		console.error("Error logging in:", error.message);
 		throw error;
 	}
 };
+
+export const registerRestaurant = async (ownerUid, restaurantData) => {
+	try {
+	  // Reference to the owner's restaurant subcollection
+	  const ownerRestaurantsRef = collection(db, "users", ownerUid, "ownedRestaurants");
+  
+	  // Add a new restaurant document with auto-generated ID
+	  const restaurantRef = await addDoc(ownerRestaurantsRef, restaurantData);
+  
+	  // The restaurantData should include fields such as name, address, cuisine, etc.
+	  console.log("Restaurant registered with ID: ", restaurantRef.id);
+  
+	  return { id: restaurantRef.id, restaurantData }; // Return the new restaurant's ID
+	} catch (error) {
+	  console.error("Error registering restaurant:", error.message);
+	  throw error;
+	}
+  };  

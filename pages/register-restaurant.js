@@ -1,18 +1,38 @@
-// pages/registerrestaurant.js
+"use client";
 
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native-web';
 import { useAuth } from "../context/AuthContext";
+import { registerRestaurant } from '../utils/firebaseUtils';
 
 function RegisterRestaurantPage() {
   const [restaurantName, setRestaurantName] = useState('');
   const [address, setAddress] = useState('');
   const [cuisine, setCuisine] = useState('');
-  const { currentUser, userDetails } = useAuth();
+  const { currentUser } = useAuth(); 
 
-  const handleFinishRegistration = () => {
-    // Logic to handle registration for Restaurant Owners
-    // e.g., API call to backend
+  const handleFinishRegistration = async () => {
+    if (currentUser) {
+      const restaurantData = {
+        ownerId: currentUser.uid,
+        name: restaurantName,
+        address: address,
+        cuisine: cuisine,
+      };
+
+      try {
+        // Call the registerRestaurant function with the current user's UID and restaurant data
+        await registerRestaurant(currentUser.uid, restaurantData);
+        console.log('Restaurant registration successful');
+        // Handle post-registration logic, such as redirecting to the dashboard
+      } catch (error) {
+        console.error('Error registering restaurant:', error);
+        // Handle the error, possibly by showing an alert or message to the user
+      }
+    } else {
+      console.error('No current user found. User must be logged in to register a restaurant.');
+      // Prompt user to log in
+    }
   };
 
   return (

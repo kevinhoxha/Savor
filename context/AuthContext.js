@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { registerUser, loginUser } from "../utils/firebaseUtils";
 
@@ -19,19 +21,26 @@ export const AuthProvider = ({ children }) => {
 	const [error, setError] = useState(null);
 
 	const handleLogin = async (email, password) => {
+		setLoading(true);
+		setError(null);
+
+		let userVal, userDetailsVal;
+
 		try {
-			setLoading(true);
-			setError(null); // Reset error state before attempting to log in
-			const { user, userDetails } = await loginUser({ email, password });
-			setCurrentUser(user);
-			setUserDetails(userDetails);
+		  const { user, userDetails } = await loginUser({ email, password });
+		  userVal = user;
+		  userDetailsVal = userDetails;
+		  setCurrentUser(user);
+		  setUserDetails(userDetails);
 		} catch (error) {
-			console.error("Login Error:", error.message);
-			setError(error.message);
+		  console.error("Login Error:", error.message);
+		  setError(error.message);
 		} finally {
 			setLoading(false);
 		}
-	};
+
+		return { currentUser: userVal, userDetails: userDetailsVal };
+	  };
 
 	const handleRegister = async (
 		email,
