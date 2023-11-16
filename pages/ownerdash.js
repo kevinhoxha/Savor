@@ -14,12 +14,16 @@ import {
 import DateTimePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Link from "next/link";
-import { fetchRestaurants, savePromotion, fetchPromotions } from "../utils/firebaseUtils";
+import {
+    fetchRestaurants,
+    savePromotion,
+    fetchPromotions,
+} from "../utils/firebaseUtils";
 import { useAuth } from "../context/AuthContext";
 
 function RestaurantDashboard() {
     const [currentRestaurant, setCurrentRestaurant] = useState(" ");
-	const [promoCurrentRestaurant, setPromoCurrentRestaurant] = useState(" ");
+    const [promoCurrentRestaurant, setPromoCurrentRestaurant] = useState(" ");
     const [restaurants, setRestaurants] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [promotionTitle, setPromotionTitle] = useState("");
@@ -40,6 +44,7 @@ function RestaurantDashboard() {
             fetchRestaurants(currentUser.uid)
                 .then((ownedRestaurants) => {
                     setRestaurants(ownedRestaurants);
+                    setCurrentRestaurant(ownedRestaurants[0]);
                 })
                 .catch((error) => {
                     console.error("Error fetching restaurants: ", error);
@@ -47,31 +52,34 @@ function RestaurantDashboard() {
         }
     }, [currentUser]);
 
-	const handleSavePromotion = async () => {
-		const promotion = {
-			restaurantId: restaurants[promoCurrentRestaurant],
-			title: promotionTitle,
-			discountPercentage,
-			quantityAvailable: discountQuantity,
-			startTime: promotionStartTime,
-			endTime: promotionEndTime,
-			createdBy: currentUser.uid
-		};
-	
-		try {
-			await savePromotion(promotion);
-			alert("Promotion saved successfully!");
-			// You might want to reset form fields and close the modal here
-		} catch (error) {
-			console.error("Error saving promotion:", error);
-			alert("Failed to save promotion");
-		}
-	};
+    const handleSavePromotion = async () => {
+        const promotion = {
+            restaurantId: restaurants[promoCurrentRestaurant],
+            title: promotionTitle,
+            discountPercentage,
+            quantityAvailable: discountQuantity,
+            startTime: promotionStartTime,
+            endTime: promotionEndTime,
+            createdBy: currentUser.uid,
+        };
+        console.log(promotionEndTime);
+        console.log((new Date(promotionEndTime)).toString());
+
+        try {
+            await savePromotion(promotion);
+            alert("Promotion saved successfully!");
+            // You might want to reset form fields and close the modal here
+        } catch (error) {
+            console.error("Error saving promotion:", error);
+            alert("Failed to save promotion");
+        }
+    };
 
     useEffect(() => {
         if (currentRestaurant) {
-            fetchPromotions(currentRestaurant)
+            fetchPromotions(restaurants[currentRestaurant])
                 .then((fetchedPromotions) => {
+                    console.log(fetchedPromotions);
                     setPromotions(fetchedPromotions);
                 })
                 .catch((error) => {
@@ -80,9 +88,12 @@ function RestaurantDashboard() {
         }
     }, [currentRestaurant]);
 
-    const currentPromos = promotions.filter(promo => new Date(promo.endTime) > new Date());
-    const pastPromos = promotions.filter(promo => new Date(promo.endTime) <= new Date());
-
+    const currentPromos = promotions.filter(
+        (promo) => new Date(promo.endTime) > new Date()
+    );
+    const pastPromos = promotions.filter(
+        (promo) => new Date(promo.endTime) <= new Date()
+    );
 
     return (
         <View style={styles.container}>
@@ -92,11 +103,13 @@ function RestaurantDashboard() {
                     onChange={(e) => setCurrentRestaurant(e.target.value)}
                     style={styles.restaurantSelector}
                 >
-                    {Object.keys(restaurants).sort((a,b) => a.localeCompare(b)).map((restaurant, index) => (
-                        <option key={index} value={restaurant}>
-                            {restaurant}
-                        </option>
-                    ))}
+                    {Object.keys(restaurants)
+                        .sort((a, b) => a.localeCompare(b))
+                        .map((restaurant, index) => (
+                            <option key={index} value={restaurant}>
+                                {restaurant}
+                            </option>
+                        ))}
                 </select>
                 <Link href="/account">
                     <Button title="My Account" />
@@ -115,14 +128,29 @@ function RestaurantDashboard() {
 
             <Text>Current Promotions</Text>
             {currentPromos.map((promo, index) => (
-                <View key={index}>
-                    <Text>{promo.title} - Available: {promo.quantityAvailable}</Text>
+                <View key={index} style={styles.restaurantCard}>
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.restaurantName}>
+                            {promo.title}
+                        </Text>
+                        <Text style={styles.discount}>
+                            {promo.quantityAvailable}
+                        </Text>
+                    </View>
                 </View>
             ))}
+
             <Text>Past Promotions</Text>
             {pastPromos.map((promo, index) => (
-                <View key={index}>
-                    <Text>{promo.title} - Available: {promo.quantityAvailable}</Text>
+                <View key={index} style={styles.restaurantCard}>
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.restaurantName}>
+                            {promo.title}
+                        </Text>
+                        <Text style={styles.discount}>
+                            {promo.quantityAvailable}
+                        </Text>
+                    </View>
                 </View>
             ))}
 
@@ -138,14 +166,18 @@ function RestaurantDashboard() {
                     <Text style={styles.inputLabel}>Restaurant</Text>
                     <select
                         value={promoCurrentRestaurant}
-                        onChange={(e) => setPromoCurrentRestaurant(e.target.value)}
+                        onChange={(e) =>
+                            setPromoCurrentRestaurant(e.target.value)
+                        }
                         style={styles.restaurantSelector}
                     >
-                        {Object.keys(restaurants).sort((a,b) => a.localeCompare(b)).map((restaurant, index) => (
-                            <option key={index} value={restaurant}>
-                                {restaurant}
-                            </option>
-                        ))}
+                        {Object.keys(restaurants)
+                            .sort((a, b) => a.localeCompare(b))
+                            .map((restaurant, index) => (
+                                <option key={index} value={restaurant}>
+                                    {restaurant}
+                                </option>
+                            ))}
                     </select>
 
                     <Text style={styles.inputLabel}>Promotion Title</Text>
@@ -298,6 +330,26 @@ const styles = StyleSheet.create({
         borderColor: "#cccccc",
         borderRadius: 4,
         marginBottom: 15,
+    },
+    restaurantCard: {
+        borderWidth: 1,
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 20,
+    },
+    cardHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    restaurantName: {
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    discount: {
+        fontSize: 16,
+        color: "green",
+        fontWeight: "bold",
     },
 });
 

@@ -3,7 +3,7 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, setDoc, addDoc, getDoc, collection, query, getDocs, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, setDoc, addDoc, getDoc, collection, query, getDocs, where } from "firebase/firestore";
 
 export const registerUser = async ({
     email,
@@ -139,8 +139,17 @@ export const getRestaurants = async () => {
 };
 
 export const fetchPromotions = async (restaurantId) => {
-    const promotionsRef = collection(db, "promotions");
-    const q = query(promotionsRef, where("restaurantId", "==", restaurantId));
+    const promotionsRef = collection(db, 'restaurants', restaurantId, 'promotions');
+    const q = query(promotionsRef);
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let promotions = [];
+
+    for (const doc of querySnapshot.docs) {
+        const promotionDoc = await getDoc(doc.data().ref);
+        if (promotionDoc.exists()) {
+            promotions.push(promotionDoc.data());
+        }
+    }
+
+    return promotions;
 };
