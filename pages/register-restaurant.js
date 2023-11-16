@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native-web';
+import { useRouter } from "next/router";
 import { useAuth } from "../context/AuthContext";
 import { registerRestaurant } from '../utils/firebaseUtils';
 
@@ -9,6 +10,7 @@ function RegisterRestaurantPage() {
   const [restaurantName, setRestaurantName] = useState('');
   const [address, setAddress] = useState('');
   const [cuisine, setCuisine] = useState('');
+  const router = useRouter();
   const { currentUser } = useAuth(); 
 
   const handleFinishRegistration = async () => {
@@ -24,6 +26,7 @@ function RegisterRestaurantPage() {
         // Call the registerRestaurant function with the current user's UID and restaurant data
         await registerRestaurant(currentUser.uid, restaurantData);
         console.log('Restaurant registration successful');
+        router.push('/ownerdash');
         // Handle post-registration logic, such as redirecting to the dashboard
       } catch (error) {
         console.error('Error registering restaurant:', error);

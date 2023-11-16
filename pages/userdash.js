@@ -1,36 +1,27 @@
 // pages/reservations.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native-web';
 import Link from 'next/link';
+import { getRestaurants } from '../utils/firebaseUtils';
 import { useAuth } from "../context/AuthContext";
 
 function ReservationsPage() {
   const [location, setLocation] = useState('');
+  const [restaurants, setRestaurants] = useState([]);
   const { currentUser, userDetails } = useAuth();
 
   console.log(currentUser)
   console.log(userDetails)
 
-  // Sample hardcoded restaurant data
-  const restaurants = [
-    {
-      name: 'Pasta Palace',
-      address: '123 Noodle St, Food City',
-      cuisine: 'Italian',
-      starRating: 4.5,
-      reservations: ['6:00 PM', '6:30 PM', '7:00 PM'],
-      discount: '20% off entire bill'
-    },
-    {
-      name: 'Sushi Central',
-      address: '456 Fish Ln, Food City',
-      cuisine: 'Japanese',
-      starRating: 4.7,
-      reservations: ['7:00 PM', '8:00 PM'],
-      discount: 'Free Appetizers'
-    }
-  ];
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      const fetchedRestaurants = await getRestaurants();
+      setRestaurants(fetchedRestaurants);
+    };
+
+    fetchRestaurants();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -54,13 +45,6 @@ function ReservationsPage() {
           </View>
           <Text style={styles.restaurantInfo}>{restaurant.address}</Text>
           <Text style={styles.restaurantInfo}>{restaurant.cuisine}</Text>
-          <Text style={styles.restaurantInfo}>Rating: {restaurant.starRating} stars</Text>
-
-          <View style={styles.reservationButtons}>
-            {restaurant.reservations.map((time, idx) => (
-              <Button key={idx} title={time} onPress={() => {/* handle reservation logic */}} style={styles.reservationButton} />
-            ))}
-          </View>
         </View>
       ))}
     </View>
@@ -108,14 +92,6 @@ const styles = StyleSheet.create({
   restaurantInfo: {
     fontSize: 16,
     marginBottom: 5,
-  },
-  reservationButtons: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  reservationButton: {
-    marginHorizontal: 5,
-    marginRight: 10,
   },
 });
 

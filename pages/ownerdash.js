@@ -14,12 +14,12 @@ import {
 import DateTimePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Link from "next/link";
-import { fetchRestaurants, savePromotion } from "../utils/firebaseUtils";
+import { fetchRestaurants, savePromotion, fetchPromotions } from "../utils/firebaseUtils";
 import { useAuth } from "../context/AuthContext";
 
 function RestaurantDashboard() {
-    const [currentRestaurant, setCurrentRestaurant] = useState("");
-	const [promoCurrentRestaurant, setPromoCurrentRestaurant] = useState("");
+    const [currentRestaurant, setCurrentRestaurant] = useState(" ");
+	const [promoCurrentRestaurant, setPromoCurrentRestaurant] = useState(" ");
     const [restaurants, setRestaurants] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [promotionTitle, setPromotionTitle] = useState("");
@@ -32,6 +32,7 @@ function RestaurantDashboard() {
         new Date().toISOString()
     );
     const { currentUser, userDetails } = useAuth();
+    const [promotions, setPromotions] = useState([]);
     const router = useRouter();
 
     useEffect(() => {
@@ -67,20 +68,21 @@ function RestaurantDashboard() {
 		}
 	};
 
-    // Sample promotion data
-    const currentPromotions = [
-        {
-            discount: "20% off entire bill",
-            reservations: 15,
-        },
-    ];
+    useEffect(() => {
+        if (currentRestaurant) {
+            fetchPromotions(currentRestaurant)
+                .then((fetchedPromotions) => {
+                    setPromotions(fetchedPromotions);
+                })
+                .catch((error) => {
+                    console.error("Error fetching promotions: ", error);
+                });
+        }
+    }, [currentRestaurant]);
 
-    const pastPromotions = [
-        {
-            discount: "Free Appetizers",
-            reservations: 25,
-        },
-    ];
+    const currentPromos = promotions.filter(promo => new Date(promo.endTime) > new Date());
+    const pastPromos = promotions.filter(promo => new Date(promo.endTime) <= new Date());
+
 
     return (
         <View style={styles.container}>
@@ -111,30 +113,18 @@ function RestaurantDashboard() {
                 />
             </View>
 
-            <View style={styles.chartContainer}>
-                <Text>Chart Placeholder</Text>
-                {/* Placeholder for the chart */}
-            </View>
-
-            <View style={styles.promotionsSection}>
-                <Text style={styles.sectionTitle}>Current Promotions</Text>
-                {currentPromotions.map((promo, index) => (
-                    <View key={index} style={styles.promotionCard}>
-                        <Text>{promo.discount}</Text>
-                        <Text>{promo.reservations} reservations booked</Text>
-                    </View>
-                ))}
-            </View>
-
-            <View style={styles.promotionsSection}>
-                <Text style={styles.sectionTitle}>Past Promotions</Text>
-                {pastPromotions.map((promo, index) => (
-                    <View key={index} style={styles.promotionCard}>
-                        <Text>{promo.discount}</Text>
-                        <Text>{promo.reservations} reservations booked</Text>
-                    </View>
-                ))}
-            </View>
+            <Text>Current Promotions</Text>
+            {currentPromos.map((promo, index) => (
+                <View key={index}>
+                    <Text>{promo.title} - Available: {promo.quantityAvailable}</Text>
+                </View>
+            ))}
+            <Text>Past Promotions</Text>
+            {pastPromos.map((promo, index) => (
+                <View key={index}>
+                    <Text>{promo.title} - Available: {promo.quantityAvailable}</Text>
+                </View>
+            ))}
 
             <Modal
                 animationType="slide"

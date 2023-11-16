@@ -123,21 +123,24 @@ export const savePromotion = async (promotionData) => {
         );
 
 		await setDoc(doc(restaurantRef, promotionRef.id), {
-			ref: promotionRef // Store the reference to the promotion
+			ref: promotionRef
 		});
-		
-        // // Update the restaurant document with a reference to the new promotion
-        // await updateDoc(restaurantRef, {
-        //     promotions2: arrayUnion(promotionRef.id)
-        // });
-
-		// await setDoc(doc(db, "restaurants", promotionData.restaurantId), {
-		// 	ref: promotionRef
-        // });
 
         return promotionRef.id;
     } catch (error) {
         console.error("Error saving promotion:", error);
         throw error;
     }
+};
+
+export const getRestaurants = async () => {
+    const querySnapshot = await getDocs(collection(db, "restaurants"));
+    return querySnapshot.docs.map(doc => doc.data());
+};
+
+export const fetchPromotions = async (restaurantId) => {
+    const promotionsRef = collection(db, "promotions");
+    const q = query(promotionsRef, where("restaurantId", "==", restaurantId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
