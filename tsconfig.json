@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "app/*": ["./packages/app/*"],
+    },
+    "module": "esnext",
+    "moduleResolution": "node"
+  },
+  "extends": "expo/tsconfig.base"
+}

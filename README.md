@@ -1,31 +1,90 @@
-# React Native Web example
+# Solito with Expo Router Example Monorepo 🕴
 
-This example features how to use [react-native-web](https://github.com/necolas/react-native-web) to bring the platform-agnostic Components and APIs of React Native to the web.
-
-> **High-quality user interfaces**: React Native for Web makes it easy to create fast, adaptive web UIs in JavaScript. It provides native-like interactions, support for multiple input modes (touch, mouse, keyboard), optimized vendor-prefixed styles, built-in support for RTL layout, built-in accessibility, and integrates with React Dev Tools.
->
-> **Write once, render anywhere**: React Native for Web interoperates with existing React DOM components and is compatible with the majority of the React Native API. You can develop new components for native and web without rewriting existing code. React Native for Web can also render to HTML and critical CSS on the server using Node.js.
-
-## Deploy your own
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-react-native-web)
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-react-native-web&project-name=with-react-native-web&repository-name=with-react-native-web)
-
-## How to use
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
-
-```bash
-npx create-next-app --example with-react-native-web with-react-native-web-app
+```sh
+npx create-solito-app@latest -t with-expo-router
 ```
 
-```bash
-yarn create next-app --example with-react-native-web with-react-native-web-app
+And just like that, you now have an Expo + Next.js app using Expo Router.
+
+## ⚡️ Instantly clone & deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnandorojo%2Fsolito%2Ftree%2Fmaster%2Fexample-monorepos%2Fwith-expo-router&project-name=solito-app&repo-name=solito-app&demo-title=Solito%20App%20⚡%EF%B8%8F&demo-description=React%20Native%20%2B%20Next.js%20starter%20with%20Solito.%20Made%20by%20Fernando%20Rojo.&demo-url=https%3A%2F%2Fsolito.dev%2Fstarter&demo-image=https%3A%2F%2Fsolito.dev%2Fimg%2Fog.png&build-command=cd+..%2F..%3Bnpx+turbo+run+build+--filter%3Dnext-app)
+
+## 🔦 About
+
+This monorepo is a starter for an Expo + Next.js app using [Expo Router](https://expo.github.io/router/) to enable a file-system based routing in native apps. The API is very Next.js- and Remix-esque. I view it as the future of cross-platform routing.
+
+## 📦 Included packages
+
+- `solito` for cross-platform navigation
+- `moti` for animations
+- `dripsy` for theming/design (you can bring your own, too)
+- Expo SDK 49
+- Next.js 13
+- Expo Router 2
+
+## 🗂 Folder layout
+
+- `apps` entry points for each app
+
+  - `expo`
+    - `app` you'll be creating files inside of `apps/expo/app` to use file system routing on iOS and Android.
+  - `next`
+
+- `packages` shared packages across apps
+  - `app` you'll be importing most files from `app/`
+    - `features` (don't use a `screens` folder. organize by feature.)
+    - `provider` (all the providers that wrap the app, and some no-ops for Web.)
+
+You can add other folders inside of `packages/` if you know what you're doing and have a good reason to.
+
+## 🏁 Start the app
+
+- Install dependencies: `yarn`
+
+- Next.js local dev: `yarn web`
+  - Runs `yarn next`
+- Expo local dev: 
+  - First (OR JUST USE `YARN NATIVE` - DYLAN), build a dev client onto your device or simulator (https://docs.expo.dev/develop/development-builds/create-a-build/)
+    - `cd apps/expo`
+    - Then, either `expo run:ios`, or `eas build`
+  - After building the dev client, from the root of the monorepo...
+    - `yarn native` (This runs `expo start --dev-client`)
+
+## 🆕 Add new dependencies
+
+### Pure JS dependencies
+
+If you're installing a JavaScript-only dependency that will be used across platforms, install it in `packages/app`:
+
+```sh
+cd packages/app
+yarn add date-fns
+cd ../..
+yarn
 ```
 
-```bash
-pnpm create next-app --example with-react-native-web with-react-native-web-app
+### Native dependencies
+
+If you're installing a library with any native code, you must install it in `apps/expo`:
+
+```sh
+cd apps/expo
+yarn add react-native-reanimated
+
+cd ../..
+yarn
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+You can also install the native library inside of `packages/app` if you want to get autoimport for that package inside of the `app` folder. However, you need to be careful and install the _exact_ same version in both packages. If the versions mismatch at all, you'll potentially get terrible bugs. This is a classic monorepo issue. I use `lerna-update-wizard` to help with this (you don't need to use Lerna to use that lib).
+
+## 🎙 About the creator
+
+Follow Fernando Rojo on Twitter: [@FernandoTheRojo](https://twitter.com/fernandotherojo)
+
+## 🧐 Why use Expo + Next.js?
+
+See my talk about this topic at Next.js Conf 2021:
+
+<a href="https://www.youtube.com/watch?v=0lnbdRweJtA"><img width="1332" alt="image" src="https://user-images.githubusercontent.com/13172299/157299915-b633e083-f271-48c6-a262-7b7eef765be5.png">
+</a>
