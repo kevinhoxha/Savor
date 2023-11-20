@@ -38,6 +38,7 @@ function LoginScreen() {
         sx={styles.input}
       />
       <TextInput
+        secureTextEntry={true} 
         value={password}
         onChangeText={setPassword}
         placeholder="Password"

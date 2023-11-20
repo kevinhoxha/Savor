@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'solito/router'
 import { Text, View, TextInput, useSx } from 'dripsy'
 import { useAuth } from 'app/context/AuthContext'
+import { Picker } from '@react-native-picker/picker';
 import { ButtonLink, TextButton } from 'app/components/Button'
 
 function RegisterPage() {
@@ -57,12 +58,12 @@ function RegisterPage() {
         sx={styles.input}
       />
       <TextInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        placeholder="Phone Number"
         placeholderTextColor="black"
         sx={styles.input}
-        secureTextEntry
       />
       <TextInput
         value={email}
@@ -73,13 +74,24 @@ function RegisterPage() {
         sx={styles.input}
       />
       <TextInput
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        placeholder="Phone"
+        value={password}
+        onChangeText={setPassword}
+        placeholder="Password"
         placeholderTextColor="black"
         sx={styles.input}
+        secureTextEntry
       />
+      <View sx={styles.pickerContainer}>
+        <Text style={styles.label}>Account Type:</Text>
+        <Picker
+          style={styles.picker}
+          selectedValue={accountType}
+          onValueChange={(itemValue) => setAccountType(itemValue)}
+        >
+          <Picker.Item label="Diner" value="Diner" />
+          <Picker.Item label="Restaurant Owner" value="Restaurant Owner" />
+        </Picker>
+      </View>
       <TextButton onPress={onRegisterPress}>Register</TextButton>
       <View sx={styles.loginCotainer}>
         <Text>Already have an account?</Text>
@@ -110,6 +122,7 @@ const styles = {
   pickerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     marginBottom: 10,
   },
   label: {

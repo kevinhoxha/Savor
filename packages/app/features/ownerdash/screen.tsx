@@ -7,6 +7,7 @@ import { Picker } from '@react-native-picker/picker'
 import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
 import Modal from 'app/components/Modal'
 import { ButtonLink, TextButton } from 'app/components/Button'
+import moment from 'moment';
 import {
   fetchRestaurants,
   savePromotion,
@@ -35,9 +36,11 @@ const RestaurantDashboard = ({
 
   useEffect(() => {
     if (currentUser) {
-      fetchRestaurants(currentUser.uid)
+      fetchRestaurants(currentUser.uid) 
         .then((ownedRestaurants) => {
           setRestaurants(ownedRestaurants)
+          const firstRestaurant = Object.keys(ownedRestaurants)[0];
+          setCurrentRestaurant(firstRestaurant);
         })
         .catch((error) => {
           console.error('Error fetching restaurants: ', error)
@@ -49,7 +52,6 @@ const RestaurantDashboard = ({
     if (currentRestaurant) {
       fetchPromotions(restaurants[currentRestaurant])
         .then((fetchedPromotions) => {
-          console.log(fetchedPromotions)
           setPromotions(fetchedPromotions)
         })
         .catch((error) => {
@@ -72,24 +74,21 @@ const RestaurantDashboard = ({
     try {
       await savePromotion(promotion)
       alert('Promotion saved successfully!')
-      // You might want to reset form fields and close the modal here
+      setPromotionTitle('');
+      setDiscountPercentage(10);
+      setDiscountQuantity(1);
+      setPromotionStartTime(new Date());
+      setPromotionEndTime(new Date());
+      // Close the modal
+      setModalVisible(false);
+
+      const fetchedPromotions = await fetchPromotions(restaurants[currentRestaurant]);
+      setPromotions(fetchedPromotions);
     } catch (error) {
       console.error('Error saving promotion:', error)
       alert('Failed to save promotion')
     }
   }
-
-  const currentPromos = new Map(
-    Object.entries(promotions).filter(
-      ([id, promo]) => new Date(promo.endTime) > new Date()
-    )
-  )
-
-  const pastPromos = new Map(
-    Object.entries(promotions).filter(
-      ([id, promo]) => new Date(promo.endTime) <= new Date()
-    )
-  )
 
   return (
     <View sx={styles.container}>
@@ -133,25 +132,43 @@ const RestaurantDashboard = ({
         {/* Placeholder for the chart */}
       </View>
 
-      <Text>Current Promotions</Text>
-      {Object.values(currentPromos).map((promo, index) => (
-        <View key={index} style={styles.restaurantCard}>
-          <View sx={styles.cardHeader}>
-            <Text sx={styles.restaurantName}>{promo.title}</Text>
-            <Text sx={styles.discount}>{promo.quantityAvailable}</Text>
-          </View>
-        </View>
-      ))}
+      <Text sx={styles.sectionTitle}>Current Promotions</Text>
+      {promotions && Object.values(promotions).map((promo, index) => {
+        const isPastPromotion = promo.quantityAvailable === 0 || new Date(promo.endTime.seconds * 1000) <= new Date();
+        if (!isPastPromotion) {
+          return (
+            <View key={index} style={styles.restaurantCard}>
+              <View sx={styles.cardHeader}>
+                <Text sx={styles.restaurantName}>{promo.title}</Text>
+                <Text sx={styles.discount}>{promo.quantityAvailable} Remaining</Text>
+              </View>
+              <Text>Start Date: {moment(promo.startTime.seconds * 1000).format('MMMM Do YYYY, h:mm a')}</Text>
+              <Text>End Date: {moment(promo.endTime.seconds * 1000).format('MMMM Do YYYY, h:mm a')}</Text>
+              <Text>Discount: {promo.discountPercentage}%</Text>
+            </View>
+          );
+        }
+        return null;
+      })}
 
-      <Text>Past Promotions</Text>
-      {Object.values(pastPromos).map((promo, index) => (
-        <View key={index} style={styles.restaurantCard}>
-          <View sx={styles.cardHeader}>
-            <Text sx={styles.restaurantName}>{promo.title}</Text>
-            <Text sx={styles.discount}>{promo.quantityAvailable}</Text>
-          </View>
-        </View>
-      ))}
+      <Text sx={styles.sectionTitle}>Past Promotions</Text>
+      {promotions && Object.values(promotions).map((promo, index) => {
+        const isPastPromotion = promo.quantityAvailable === 0 || new Date(promo.endTime.seconds * 1000) <= new Date();
+        if (isPastPromotion) {
+          return (
+            <View key={index} style={styles.restaurantCard}>
+              <View sx={styles.cardHeader}>
+                <Text sx={styles.restaurantName}>{promo.title}</Text>
+                <Text sx={styles.discountExpired}>{promo.quantityAvailable} Remaining</Text>
+              </View>
+              <Text>Start Date: {moment(promo.startTime.seconds * 1000).format('MMMM Do YYYY, h:mm a')}</Text>
+              <Text>End Date: {moment(promo.endTime.seconds * 1000).format('MMMM Do YYYY, h:mm a')}</Text>
+              <Text>Discount: {promo.discountPercentage}%</Text>
+            </View>
+          );
+        }
+        return null;
+      })}
 
       <Modal
         visible={modalVisible}
@@ -273,7 +290,10 @@ const styles = {
     flexWrap: 'wrap', // Allow buttons to wrap
     justifyContent: 'flex-end', // Push buttons to the right
     alignItems: 'center', // Align buttons vertically
-    // flexGrow: 1, // Allow this container to expand
+    flexGrow: 1, // Allow this container to expand
+  },
+  button: {
+    marginRight: 10
   },
   restaurantSelector: {
     borderWidth: 1,
@@ -293,7 +313,7 @@ const styles = {
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
   },
@@ -338,9 +358,6 @@ const styles = {
     borderRadius: 4,
     marginBottom: 15,
   },
-  button: {
-    // Add any specific styles for buttons here
-  },
   modal: {
     // Add any specific styles for the modal here
   },
@@ -364,6 +381,11 @@ const styles = {
     color: 'green',
     fontWeight: 'bold',
   },
+  discountExpired: {
+    fontSize: 16,
+    color: 'red',
+    fontWeight: 'bold',
+  }
 }
 
 export default RestaurantDashboard

@@ -1,4 +1,4 @@
-import { useSx, View } from 'dripsy'
+import { useSx, View, Text} from 'dripsy'
 import { ButtonLink } from 'app/components/Button'
 import { SolitoImage } from 'solito/image'
 
@@ -13,13 +13,15 @@ export function HomeScreen() {
         height={325}
         contentFit
         onLayout={() => {}}
-        style={{ marginBottom: 50, borderRadius: 15 }}
+        style={{ marginBottom: 30, borderRadius: 15 }}
         alt="logo"
         resizeMode="contain"
       />
+
+      <Text sx={styles.sectionTitle}>Dine for less, today</Text>
       <View sx={{flex: 1, gap: 40, flexDirection: "row"}}>
-        <ButtonLink href="/register">Register</ButtonLink>
         <ButtonLink href="/login">Login</ButtonLink>
+        <ButtonLink href="/register">Register</ButtonLink>
       </View>
     </View>
   )
@@ -41,6 +43,11 @@ const styles = {
   },
   loginButton: {
     marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 30,
   },
 }
 

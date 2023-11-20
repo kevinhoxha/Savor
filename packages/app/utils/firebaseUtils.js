@@ -132,9 +132,76 @@ export const savePromotion = async (promotionData) => {
     }
 };
 
+export const saveReservation = async (reservationData) => {
+    try {
+        // Add reservation to 'reservations' collection
+        const reservationRef = await addDoc(collection(db, "reservations"), reservationData);
+		console.log(reservationData)
+        return reservationRef.id;
+    } catch (error) {
+        console.error("Error saving reservation:", error);
+        throw error;
+    }
+};
+
+export const fetchReservations = async (userId) => {
+    try {
+        const querySnapshot = await getDocs(collection(db, "reservations"));
+        let reservations = [];
+
+        querySnapshot.forEach((doc) => {
+            const reservationData = doc.data();
+            if (reservationData.createdBy === userId) {
+                reservations.push({ id: doc.id, refId: doc.ref.id, ...reservationData });
+            }
+        });
+        return reservations;
+    } catch (error) {
+        console.error("Error fetching reservations:", error.message);
+        throw error;
+    }
+};
+
 export const getRestaurants = async () => {
-    const querySnapshot = await getDocs(collection(db, "restaurants"));
-    return querySnapshot.docs.map(doc => doc.data());
+    try {
+        const querySnapshot = await getDocs(collection(db, "restaurants"));
+        let restaurants = [];
+
+        querySnapshot.forEach((doc) => {
+            const restaurantData = doc.data();
+            restaurants.push({ id: doc.id, refId: doc.ref.id, ...restaurantData });
+        });
+
+        return restaurants;
+    } catch (error) {
+        console.error("Error getting restaurants:", error.message);
+        throw error;
+    }
+};
+
+export const getPromotions = async (restaurantId) => {
+    try {
+        // Reference to the restaurant's promotions subcollection
+        const restaurantPromotionsRef = collection(db, "restaurants", restaurantId, "promotions");
+
+        // Get all promotions for the specified restaurant
+        const querySnapshot = await getDocs(restaurantPromotionsRef);
+
+        let promotions = [];
+
+        for (const doc of querySnapshot.docs) {
+            const ref = doc.data().ref;
+            const promotionDoc = await getDoc(ref);
+            if (promotionDoc.exists()) {
+                promotions.push(promotionDoc.data());
+            }
+        }
+    
+        return promotions;
+    } catch (error) {
+        console.error("Error getting promotions:", error.message);
+        throw error;
+    }
 };
 
 export const fetchPromotions = async (restaurantId) => {
