@@ -13,6 +13,7 @@ import {
   savePromotion,
   fetchPromotionsByRestaurant,
   fetchReservationsByPromotion,
+  cancelReservation,
 } from 'app/utils/firebaseUtils'
 import { useAuth } from 'app/context/AuthContext'
 import { Restaurant, Promotion, Reservation } from 'app/types/schema'
@@ -196,7 +197,7 @@ const RestaurantDashboard = ({
 
       <Text sx={styles.sectionTitle}>Current Promotions</Text>
       {promotions &&
-        Object.values(promotions).map((promo, index) => {
+        Object.entries(promotions).map(([promotionId, promo], index) => {
           const isPastPromotion =
             promo.quantityAvailable === 0 ||
             new Date(promo.endTime.seconds * 1000) <= new Date()
@@ -222,6 +223,12 @@ const RestaurantDashboard = ({
                   )}
                 </Text>
                 <Text>Discount: {promo.discountPercentage}%</Text>
+                <TextButton
+                  style={styles.viewReservationsButton}
+                  onPress={() => handleViewReservations(promotionId)}
+                >
+                  View Reservations
+                </TextButton>
               </View>
             )
           }
