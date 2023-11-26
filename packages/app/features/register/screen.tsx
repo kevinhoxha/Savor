@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'solito/router'
 import { Text, View, TextInput, useSx } from 'dripsy'
 import { useAuth } from 'app/context/AuthContext'
-import { Picker } from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker'
 import { ButtonLink, TextButton } from 'app/components/Button'
 
 function RegisterPage() {
@@ -31,7 +31,7 @@ function RegisterPage() {
 
       // Redirect the user based on account type
       if (accountType === 'Diner') {
-        router.push('/login')
+        router.push('/userdash')
       } else if (accountType === 'Restaurant Owner') {
         router.push('/register-restaurant')
       }

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'solito/router';
 import { Text, View, TextInput } from 'dripsy';
 import { useAuth } from "app/context/AuthContext";
-import { registerRestaurant } from 'app/utils/firebaseUtils';
+import { saveRestaurant } from 'app/utils/firebaseUtils';
 import { TextButton } from 'app/components/Button';
 
 function RegisterRestaurantScreen() {
@@ -24,7 +24,7 @@ function RegisterRestaurantScreen() {
       };
 
       try {
-        await registerRestaurant(currentUser.uid, restaurantData);
+        await saveRestaurant(currentUser.uid, restaurantData);
         console.log('Restaurant registration successful');
         router.push("/ownerdash")
       } catch (error) {
@@ -66,7 +66,7 @@ function RegisterRestaurantScreen() {
         sx={styles.input}
       />
 
-      <TextButton onPress={handleFinishRegistration}>Finish Account Creation</TextButton>
+      <TextButton onPress={handleFinishRegistration}>Register Restaurant</TextButton>
     </View>
   );
 }

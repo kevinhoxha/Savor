@@ -1,60 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Text, Pressable, useSx } from 'dripsy';
-import { ButtonLink, TextButton } from 'app/components/Button';
-import { useAuth } from 'app/context/AuthContext';
-import { useRouter } from 'solito/router';
+import React, { useState, useEffect } from 'react'
+import { View, Text, useSx } from 'dripsy'
+import { ButtonLink, TextButton } from 'app/components/Button'
+import { useAuth } from 'app/context/AuthContext'
+import { useRouter } from 'solito/router'
 import {
-  fetchRestaurants,
-  savePromotion,
-  fetchPromotions,
+  fetchRestaurantsByUser,
   fetchReservations,
-} from 'app/utils/firebaseUtils';
+} from 'app/utils/firebaseUtils'
+import { Reservation, Restaurant } from 'app/types/schema'
+import { formatDate } from 'app/utils/helperFunctions'
 
 const AccountScreen = () => {
-  const { currentUser, userDetails } = useAuth();
-  const [restaurants, setRestaurants] = useState([]);
-  const[reservations, setReservations] = useState([]);
+  const { currentUser, userDetails } = useAuth()
+  const [restaurants, setRestaurants] = useState<Record<string, Restaurant>>({})
+  const [reservations, setReservations] = useState<Record<string, Reservation>>(
+    {}
+  )
+  const sx = useSx()
+  const router = useRouter()
 
   useEffect(() => {
-    // Fetch user-specific data based on the user type (diner or restaurant owner)
-    if (currentUser && userDetails) {
-      if (userDetails?.accountType === 'Diner') {
-        fetchReservations(currentUser.uid)
-          .then((myReservations) => {
-            setReservations(myReservations);
-          })
-          .catch((error) => {
-            console.error('Error fetching reservations: ', error);
-          });
-        // Fetch diner-specific data
-        // For example, fetch name, phone number, and email
-      } else if (userDetails?.accountType === 'Restaurant Owner') {
-        // Fetch restaurant owner-specific data
-        // For example, fetch name, phone number, email, and list of restaurants
-        fetchRestaurants(currentUser.uid)
-          .then((ownedRestaurants) => {
-            setRestaurants(ownedRestaurants);
-          })
-          .catch((error) => {
-            console.error('Error fetching restaurants: ', error);
-          });
-      }
+    if (!currentUser) {
+      console.error('No current user found. User must be logged in')
+      router.push('/login')
+      return
     }
-  }, [currentUser, userDetails]);
+
+    fetchReservations(currentUser.uid)
+      .then((myReservations) => {
+        setReservations(myReservations as Record<string, Reservation>)
+      })
+      .catch((error) => {
+        console.error('Error fetching reservations: ', error)
+      })
+    if (userDetails?.accountType === 'Restaurant Owner') {
+      fetchRestaurantsByUser(currentUser.uid)
+        .then((ownedRestaurants) => {
+          setRestaurants(ownedRestaurants as Record<string, Restaurant>)
+        })
+        .catch((error) => {
+          console.error('Error fetching restaurants: ', error)
+        })
+    }
+  }, [currentUser, userDetails])
 
   return (
     <View sx={styles.container}>
       <Text sx={styles.header}>Account Information</Text>
 
-      {/* Display common user information */}
       <View sx={styles.infoContainer}>
         <Text sx={styles.label}>Name:</Text>
-        <Text>{userDetails?.firstName} {userDetails?.lastName}</Text>
+        <Text>
+          {userDetails?.firstName} {userDetails?.lastName}
+        </Text>
       </View>
 
       <View sx={styles.infoContainer}>
         <Text sx={styles.label}>Email:</Text>
-        <Text>{currentUser.email}</Text>
+        <Text>{currentUser?.email}</Text>
       </View>
 
       <View sx={styles.infoContainer}>
@@ -62,29 +65,45 @@ const AccountScreen = () => {
         <Text>{userDetails?.phone}</Text>
       </View>
 
-      {/* If the user is a restaurant owner, display restaurant information */}
       {userDetails?.accountType === 'Restaurant Owner' && (
-        <>
+        <View>
           <Text sx={styles.subheader}>Your Restaurants:</Text>
-          {/* Display list of restaurants */}
-          
-        </>
+          {Object.entries(restaurants).map(([id, restaurant], index) => (
+            <View key={index} sx={styles.restaurantCard}>
+              <Text>{restaurant.name}</Text>
+              <Text>{restaurant.address}</Text>
+            </View>
+          ))}
+        </View>
       )}
 
-      {userDetails?.accountType === 'Diner' && (
-        <>
-          <Text sx={styles.subheader}>Your Reservations:</Text>
-          {Object.values(reservations).map((reservation) => {
-            <Text>{reservation.id}</Text>
-          })}
-        </>
-      )}
+      <View>
+        <Text sx={styles.subheader}>Your Reservations:</Text>
+        {Object.entries(reservations).map(([id, reservation], index) => (
+          <View key={index} sx={styles.reservationCard}>
+            {/* Probably should be getting restaurant name here but it is a hassle as of rn */}
+            <Text>Restaurant ID: {reservation.restaurantId}</Text>
+            <Text>Promotion ID: {reservation.promotionId}</Text>
+            <Text>Discount: {reservation.discount}%</Text>
+            <Text>Party Size: {reservation.partySize}</Text>
+            <Text>
+              Reservation Time: {formatDate(reservation.reservationTime.toDate())}
+            </Text>
+          </View>
+        ))}
+      </View>
 
-      {/* Allow users to change password */}
-      <TextButton sx={styles.changePasswordButton}>Change Password</TextButton>
+      <TextButton
+        onPress={() => {
+          /* Logic to change password */
+        }}
+        sx={styles.changePasswordButton}
+      >
+        Change Password
+      </TextButton>
     </View>
-  );
-};
+  )
+}
 
 const styles = {
   container: {
@@ -114,9 +133,15 @@ const styles = {
     padding: 15,
     marginBottom: 20,
   },
+  reservationCard: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+  },
   changePasswordButton: {
     marginTop: 20,
   },
-};
+}
 
-export default AccountScreen;
+export default AccountScreen

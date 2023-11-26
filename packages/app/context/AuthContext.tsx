@@ -27,7 +27,10 @@ interface AuthContextType {
   handleLogin: (
     email: string,
     password: string
-  ) => Promise<{ user: User | null; userDetails: UserDetails | DocumentData | null }>
+  ) => Promise<{
+    user: User | null
+    userDetails: UserDetails | DocumentData | null
+  }>
   handleRegister: (
     email: string,
     password: string,
@@ -53,7 +56,9 @@ export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [userDetails, setUserDetails] = useState<UserDetails | DocumentData | null | undefined>(null)
+  const [userDetails, setUserDetails] = useState<
+    UserDetails | DocumentData | null | undefined
+  >(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -64,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let userVal, userDetailsVal
 
     try {
-      const { user, userDetails } = await loginUser({ email, password })
+      const { user, userDetails } = await loginUser(email, password)
       userVal = user
       userDetailsVal = userDetails
       setCurrentUser(user)
@@ -98,6 +103,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         phone,
         accountType,
       })
+
+      if (!user) {
+        handleLogin(email, password)
+      }
+
       setCurrentUser(user)
       setUserDetails({
         email,

@@ -1,16 +1,17 @@
-import { Modal, Platform } from 'react-native'
+import React from 'react'
+import { Modal as RNModal, Platform } from 'react-native'
 
-export const MyModal = ({ children, ...props }) => (
-  <Modal
+const Modal = ({ children, ...props }) => (
+  <RNModal
     visible
     // onRequestClose={close}
-    presentationStyle='formSheet'
+    presentationStyle="formSheet"
     animationType="slide"
     transparent={Platform.OS != 'ios'}
     {...props}
   >
     {children}
-  </Modal>
+  </RNModal>
 )
 
-export default MyModal
+export default Modal

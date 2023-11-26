@@ -7,7 +7,7 @@ import { useRouter } from 'solito/router'
 function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { handleLogin } = useAuth();
+  const { userDetails, handleLogin } = useAuth();
   const router = useRouter();
   const sx = useSx();
 
@@ -15,8 +15,6 @@ function LoginScreen() {
     try {
         const { user, userDetails } = await handleLogin(email, password); // Use the handleLogin method from AuthContext
 
-        console.log(userDetails);
-        // Redirect based on accountType which should now be updated in context
         if (userDetails?.accountType === "Diner") {
             router.push("/userdash");
         } else if (userDetails?.accountType === "Restaurant Owner") {

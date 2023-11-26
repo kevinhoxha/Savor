@@ -1,222 +1,270 @@
-import { auth, db } from "./firebase";
+import { auth, db } from './firebase'
 import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-} from "firebase/auth";
-import { doc, setDoc, addDoc, getDoc, collection, query, getDocs, where } from "firebase/firestore";
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth'
+import {
+  doc,
+  setDoc,
+  addDoc,
+  getDoc,
+  collection,
+  query,
+  getDocs,
+  where,
+} from 'firebase/firestore'
 
 export const registerUser = async ({
-    email,
-    password,
-    firstName,
-    lastName,
-    phone,
-    accountType,
+  email,
+  password,
+  firstName,
+  lastName,
+  phone,
+  accountType,
 }) => {
-    try {
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-        const user = userCredential.user;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    )
 
-        // Save additional user details in Firestore
-        const userRef = doc(db, "users", user.uid);
-        await setDoc(userRef, {
-            email,
-            firstName,
-            lastName,
-            phone,
-            accountType,
-        });
+    const user = userCredential.user
 
-        return { user };
-    } catch (error) {
-        console.error("Error registering:", error.message);
-        throw error;
+    // Save additional user details in Firestore
+    const userRef = doc(db, 'users', user.uid)
+    await setDoc(userRef, {
+      email,
+      firstName,
+      lastName,
+      phone,
+      accountType,
+    })
+
+    return { user }
+  } catch (error) {
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        console.log(`Email address ${email} already in use. Logging in...`)
+        return { user: null }
+      case 'auth/invalid-email':
+        console.log(`Email address ${email} is invalid.`)
+        break
+      case 'auth/operation-not-allowed':
+        console.log(`Error during sign up.`)
+        break
+      case 'auth/weak-password':
+        console.log(
+          'Password is not strong enough. Add additional characters including special characters and numbers.'
+        )
+        break
+      default:
+        console.error('Error registering:', error.message)
+        break
     }
-};
 
-export const loginUser = async ({ email, password }) => {
-    try {
-        const userCredential = await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-        const user = userCredential.user;
+    throw error
+  }
+}
 
-        // Retrieve user type from Firestore
-        const userRef = doc(db, "users", user.uid); // Adjusted this
-        const userDoc = await getDoc(userRef); // Adjusted this
-        const userDetails = userDoc.data();
+export const loginUser = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    )
+    const user = userCredential.user
 
-        return { user, userDetails };
-    } catch (error) {
-        console.error("Error logging in:", error.message);
-        throw error;
-    }
-};
+    // Retrieve user type from Firestore
+    const userRef = doc(db, 'users', user.uid) // Adjusted this
+    const userDoc = await getDoc(userRef) // Adjusted this
+    const userDetails = userDoc.data()
 
-export const registerRestaurant = async (ownerUid, restaurantData) => {
-    try {
-        // Reference to the owner's restaurant subcollection
-        
+    return { user, userDetails }
+  } catch (error) {
+    console.error('Error logging in:', error.message)
+    throw error
+  }
+}
 
-        // Add a new restaurant document with auto-generated ID
-        const restaurantRef = await addDoc(collection(db, "restaurants"), {
-            ...restaurantData,
-        });
-
-		const ownerRestaurantsRef = collection(
-            db,
-            "users",
-            ownerUid,
-            "ownedRestaurants"
-        );
-
-		await setDoc(doc(ownerRestaurantsRef, restaurantRef.id), {
-            ref: restaurantRef // Store the reference to the restaurant
-        });
-
-        // The restaurantData should include fields such as name, address, cuisine, etc.
-        console.log("Restaurant registered with ID: ", restaurantRef.id);
-
-        return { id: restaurantRef.id, restaurantData }; // Return the new restaurant's ID
-    } catch (error) {
-        console.error("Error registering restaurant:", error.message);
-        throw error;
-    }
-};
-
-export const fetchRestaurants = async (userId) => {
-    const ownerRestaurantsRef = collection(db, 'users', userId, 'ownedRestaurants');
-    const q = query(ownerRestaurantsRef);
-    const querySnapshot = await getDocs(q);
-    let ownedRestaurants = new Map();
+async function fetchCollection(collectionRef, isSubCollection = false) {
+  try {
+    const querySnapshot = await getDocs(collectionRef)
+    let collection = {}
 
     for (const docRef of querySnapshot.docs) {
-        const ref = docRef.data().ref;
-        const restaurantDoc = await getDoc(ref);
-        if (restaurantDoc.exists()) {
-            ownedRestaurants[restaurantDoc.data().name] = ref.id;
+      if (isSubCollection) {
+        const doc = await getDoc(docRef.data().ref)
+        if (doc.exists()) {
+          collection[doc.id] = doc.data()
         }
+      } else {
+        collection[docRef.id] = docRef.data()
+      }
     }
 
-    return ownedRestaurants;
-};
+    return collection
+  } catch (error) {
+    console.error('Error fetching collection:', error.message)
+    throw error
+  }
+}
 
+async function saveDocumentWithSubCollection(
+  mainCollectionRef,
+  data,
+  subCollectionRefs
+) {
+  try {
+    const docRef = await addDoc(mainCollectionRef, data)
+    for (const subCollectionRef of subCollectionRefs) {
+      await setDoc(doc(subCollectionRef, docRef.id), {
+        ref: docRef,
+      })
+    }
+
+    return docRef
+  } catch (error) {
+    console.error('Error saving document:', error)
+    throw error
+  }
+}
+
+export const saveRestaurant = async (ownerUid, restaurantData) => {
+  const restaurantRef = collection(db, 'restaurants')
+  const ownerRestaurantsRef = collection(
+    db,
+    'users',
+    ownerUid,
+    'ownedRestaurants'
+  )
+
+  return await saveDocumentWithSubCollection(restaurantRef, restaurantData, [
+    ownerRestaurantsRef,
+  ])
+}
+
+export const fetchRestaurantsByUser = async (userId) => {
+  const ownerRestaurantsRef = collection(
+    db,
+    'users',
+    userId,
+    'ownedRestaurants'
+  )
+
+  return await fetchCollection(ownerRestaurantsRef, true)
+}
 
 export const savePromotion = async (promotionData) => {
-    try {
-        // Add promotion to 'promotions' collection
-        const promotionRef = await addDoc(collection(db, "promotions"), promotionData);
-		console.log(promotionData)
+  const promotionRef = collection(db, 'promotions')
+  console.log(promotionData)
+  const restaurantPromotionsRef = collection(
+    db,
+    'restaurants',
+    promotionData.restaurantId,
+    'promotions'
+  )
 
-		const restaurantRef = collection(
-            db,
-            "restaurants",
-            promotionData.restaurantId,
-            "promotions"
-        );
+  return await saveDocumentWithSubCollection(promotionRef, promotionData, [
+    restaurantPromotionsRef,
+  ]).id
+}
 
-		await setDoc(doc(restaurantRef, promotionRef.id), {
-			ref: promotionRef
-		});
-
-        return promotionRef.id;
-    } catch (error) {
-        console.error("Error saving promotion:", error);
-        throw error;
-    }
-};
+export const updatePromotion = async (promotionId, promotionData) => {
+  const promotionRef = doc(db, 'promotions', promotionId)
+  await setDoc(promotionRef, promotionData, { merge: true })
+}
 
 export const saveReservation = async (reservationData) => {
-    try {
-        // Add reservation to 'reservations' collection
-        const reservationRef = await addDoc(collection(db, "reservations"), reservationData);
-		console.log(reservationData)
-        return reservationRef.id;
-    } catch (error) {
-        console.error("Error saving reservation:", error);
-        throw error;
-    }
-};
+  console.log(reservationData)
+  const reservationRef = collection(db, 'reservations')
+  const restaurantReservationsRef = collection(
+    db,
+    'restaurants',
+    reservationData.restaurantId,
+    'reservations'
+  )
+  const promotionReservationsRef = collection(
+    db,
+    'promotions',
+    reservationData.promotionId,
+    'reservations'
+  )
+  const userReservationsRef = collection(
+    db,
+    'users',
+    reservationData.createdBy,
+    'reservations'
+  )
+
+  return await saveDocumentWithSubCollection(reservationRef, reservationData, [
+    restaurantReservationsRef,
+    promotionReservationsRef,
+    userReservationsRef,
+  ]).id
+}
 
 export const fetchReservations = async (userId) => {
-    try {
-        const querySnapshot = await getDocs(collection(db, "reservations"));
-        let reservations = [];
+  const reservationsRef = collection(db, 'users', userId, 'reservations')
+  return await fetchCollection(reservationsRef, true)
+}
 
-        querySnapshot.forEach((doc) => {
-            const reservationData = doc.data();
-            if (reservationData.createdBy === userId) {
-                reservations.push({ id: doc.id, refId: doc.ref.id, ...reservationData });
-            }
-        });
-        return reservations;
-    } catch (error) {
-        console.error("Error fetching reservations:", error.message);
-        throw error;
-    }
-};
+export const fetchReservationsByPromotion = async (promotionId) => {
+  const reservationsRef = collection(
+    db,
+    'promotions',
+    promotionId,
+    'reservations'
+  )
+  return await fetchCollection(reservationsRef, true)
+}
 
-export const getRestaurants = async () => {
-    try {
-        const querySnapshot = await getDocs(collection(db, "restaurants"));
-        let restaurants = [];
+export const fetchRestaurants = async () => {
+  const restaurantsRef = collection(db, 'restaurants')
+  return await fetchCollection(restaurantsRef)
+}
 
-        querySnapshot.forEach((doc) => {
-            const restaurantData = doc.data();
-            restaurants.push({ id: doc.id, refId: doc.ref.id, ...restaurantData });
-        });
+export const fetchPromotionsByRestaurant = async (restaurantId) => {
+  const promotionsRef = collection(
+    db,
+    'restaurants',
+    restaurantId,
+    'promotions'
+  )
 
-        return restaurants;
-    } catch (error) {
-        console.error("Error getting restaurants:", error.message);
-        throw error;
-    }
-};
+  return await fetchCollection(promotionsRef, true)
+}
 
-export const getPromotions = async (restaurantId) => {
-    try {
-        // Reference to the restaurant's promotions subcollection
-        const restaurantPromotionsRef = collection(db, "restaurants", restaurantId, "promotions");
+export const fetchRestaurantsWithPromotions = async () => {
+  const fetchedRestaurants = await fetchRestaurants()
 
-        // Get all promotions for the specified restaurant
-        const querySnapshot = await getDocs(restaurantPromotionsRef);
+  const allPromotions = await Promise.all(
+    Object.entries(fetchedRestaurants).map(
+      async ([restaurant, restaurantData]) => {
+        const restaurantPromotions = await fetchPromotionsByRestaurant(
+          restaurant
+        )
+        return [
+          restaurant,
+          { ...restaurantData, promotions: restaurantPromotions },
+        ]
+      }
+    )
+  )
 
-        let promotions = [];
+  return Object.fromEntries(allPromotions)
+}
 
-        for (const doc of querySnapshot.docs) {
-            const ref = doc.data().ref;
-            const promotionDoc = await getDoc(ref);
-            if (promotionDoc.exists()) {
-                promotions.push(promotionDoc.data());
-            }
-        }
-    
-        return promotions;
-    } catch (error) {
-        console.error("Error getting promotions:", error.message);
-        throw error;
-    }
-};
+export const fetchReservationsByUser = async (userId) => {
+  const reservationsRef = collection(db, 'users', userId, 'reservations')
+  return await fetchCollection(reservationsRef, true)
+}
 
-export const fetchPromotions = async (restaurantId) => {
-    const promotionsRef = collection(db, 'restaurants', restaurantId, 'promotions');
-    const q = query(promotionsRef);
-    const querySnapshot = await getDocs(q);
-    let promotions = new Map();
+export const deleteDocumentWithCollection = async (docRef, subCollectionRefs) => {
 
-    for (const doc of querySnapshot.docs) {
-        const ref = doc.data().ref;
-        const promotionDoc = await getDoc(ref);
-        if (promotionDoc.exists()) {
-            promotions[ref.id] = promotionDoc.data();
-        }
-    }
+}
 
-    return promotions;
-};
+export const cancelReservation = async (reservationId, restaurantId, promotionId, userId) => {
+
+}
