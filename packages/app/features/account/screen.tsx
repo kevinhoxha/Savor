@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, useSx } from 'dripsy'
+import { View, Text, useSx, ScrollView } from 'dripsy'
 import { ButtonLink, TextButton } from 'app/components/Button'
 import { useAuth } from 'app/context/AuthContext'
 import { useRouter } from 'solito/router'
@@ -45,7 +45,7 @@ const AccountScreen = () => {
   }, [currentUser, userDetails])
 
   return (
-    <View sx={styles.container}>
+    <ScrollView sx={styles.container}>
       <Text sx={styles.header}>Account Information</Text>
 
       <View sx={styles.infoContainer}>
@@ -101,7 +101,7 @@ const AccountScreen = () => {
       >
         Change Password
       </TextButton>
-    </View>
+    </ScrollView>
   )
 }
 

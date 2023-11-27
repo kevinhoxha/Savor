@@ -31,6 +31,9 @@
     "expo-image": "^1.5.1",
     "firebase": "^10.6.0",
     "moment": "^2.29.4",
-    "react-router-dom": "^6.19.0"
+    "react-native-picker-select": "^9.0.0",
+    "react-native-vector-icons": "^10.0.2",
+    "react-router-dom": "^6.19.0",
+    "yarn": "^1.22.21"
   }
 }

@@ -2,11 +2,14 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'solito/router'
-import { Text, View, TextInput, useSx, Row } from 'dripsy'
+import { Text, View, TextInput, useSx, Row, ScrollView } from 'dripsy'
+import RNPickerSelect from 'react-native-picker-select'
+import { TouchableOpacity } from 'react-native'
 import { Picker } from '@react-native-picker/picker'
 import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
 import Modal from 'app/components/Modal'
 import { ButtonLink, TextButton } from 'app/components/Button'
+import { AntDesign } from '@expo/vector-icons'
 import moment from 'moment'
 import {
   fetchRestaurantsByUser,
@@ -31,6 +34,7 @@ const RestaurantDashboard = ({
     {}
   )
   const [modalVisible, setModalVisible] = useState(false)
+  const [isButtonsVisible, setIsButtonsVisible] = useState(false)
   const [reservationsModalVisible, setReservationsModalVisible] =
     useState(false)
   const [promotionTitle, setPromotionTitle] = useState('')
@@ -158,41 +162,103 @@ const RestaurantDashboard = ({
     }
   }
 
-  return (
-    <View sx={styles.container}>
-      <Row sx={styles.header}>
-        <View sx={styles.pickerContainer}>
-          {/* @ts-ignore */}
-          <Picker
-            selectedValue={currentRestaurant}
-            onValueChange={(itemValue, itemIndex) => {
-              setCurrentRestaurant(itemValue)
-              setPromoCurrentRestaurant(itemValue)
-            }}
-            style={styles.restaurantSelector}
-            mode="dropdown"
-            itemStyle={styles.restaurantSelector}
-            placeholder="Restaurant Select"
-          >
-            {Object.entries(restaurants).map(([restaurant, data], index) => (
-              <Picker.Item key={index} label={data.name} value={restaurant} />
-            ))}
-          </Picker>
-        </View>
-        <View sx={styles.headerButtonContainer}>
-          <ButtonLink href="/account">My Account</ButtonLink>
-          <TextButton onPress={() => setModalVisible(true)}>
-            New Promotion
-          </TextButton>
-          <ButtonLink href="/register-restaurant">
-            Register Restaurant
-          </ButtonLink>
-        </View>
-      </Row>
+  const restaurantItems = Object.entries(restaurants).map(
+    ([key, restaurant]) => ({
+      label: restaurant.name,
+      value: key,
+    })
+  )
 
-      <View sx={styles.chartContainer}>
-        <Text>Chart Placeholder</Text>
-        {/* Placeholder for the chart */}
+  return (
+    <ScrollView sx={styles.container}>
+      <View sx={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View sx={{ flex: 1, marginRight: 10 }}>
+          {/* @ts-ignore */}
+          <RNPickerSelect
+            onValueChange={(value) => setCurrentRestaurant(value)}
+            items={restaurantItems}
+            value={currentRestaurant}
+            style={{
+              inputIOS: sx({
+                color: 'black',
+                fontSize: 16,
+                paddingVertical: 12,
+                paddingHorizontal: 10,
+                borderRadius: 4,
+                backgroundColor: 'white',
+                borderColor: 'gray',
+                borderWidth: 1,
+                textAlign: 'center',
+              }),
+            }}
+            placeholder={{
+              label: 'Select a Restaurant',
+              value: null,
+            }}
+          />
+        </View>
+
+        <TouchableOpacity onPress={() => setIsButtonsVisible(true)}>
+          <AntDesign name="pluscircle" size={24} color="black" />
+        </TouchableOpacity>
+
+        <Modal
+          animationType="slide"
+          visible={isButtonsVisible}
+          onRequestClose={() => setIsButtonsVisible(false)}
+        >
+          <View
+            sx={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <View
+              sx={{
+                width: 300,
+                backgroundColor: 'white',
+                padding: 20,
+                borderRadius: 10,
+              }}
+            >
+              <View sx={{ marginBottom: 20 }}>
+                <TextButton
+                  onPress={() => {
+                    setIsButtonsVisible(false)
+                    router.push('/account')
+                  }}
+                >
+                  My Account
+                </TextButton>
+              </View>
+              <View sx={{ marginBottom: 20 }}>
+                <TextButton
+                  onPress={() => {
+                    setIsButtonsVisible(false)
+                    setModalVisible(true)
+                  }}
+                >
+                  New Promotion
+                </TextButton>
+              </View>
+              <View sx={{ marginBottom: 20 }}>
+                <TextButton
+                  onPress={() => {
+                    setIsButtonsVisible(false)
+                    router.push('/register-restaurant')
+                  }}
+                >
+                  Register Restaurant
+                </TextButton>
+              </View>
+              <TextButton onPress={() => setIsButtonsVisible(false)}>
+                Close
+              </TextButton>
+            </View>
+          </View>
+        </Modal>
       </View>
 
       <Text sx={styles.sectionTitle}>Current Promotions</Text>
@@ -282,18 +348,28 @@ const RestaurantDashboard = ({
       >
         <View sx={styles.modalView}>
           <Text sx={styles.inputLabel}>Restaurant</Text>
-          <Picker
-            selectedValue={promoCurrentRestaurant}
-            onValueChange={(itemValue, itemIndex) =>
-              setPromoCurrentRestaurant(itemValue)
-            }
-            //@ts-ignore
-            style={styles.restaurantSelector}
-          >
-            {Object.entries(restaurants).map(([restaurant, data], index) => (
-              <Picker.Item key={index} label={data.name} value={restaurant} />
-            ))}
-          </Picker>
+          <RNPickerSelect
+            onValueChange={(value) => setPromoCurrentRestaurant(value)}
+            items={restaurantItems}
+            value={promoCurrentRestaurant}
+            style={{
+              inputIOS: sx({
+                color: 'black',
+                fontSize: 16,
+                paddingVertical: 12,
+                paddingHorizontal: 10,
+                borderRadius: 4,
+                backgroundColor: 'white',
+                borderColor: 'gray',
+                borderWidth: 1,
+                textAlign: 'center',
+              }),
+            }}
+            placeholder={{
+              label: 'Select a Restaurant',
+              value: null,
+            }}
+          />
 
           <Text sx={styles.inputLabel}>Promotion Title</Text>
           <TextInput
@@ -305,18 +381,34 @@ const RestaurantDashboard = ({
           />
 
           <Text sx={styles.inputLabel}>Discount Percentage</Text>
-          <Picker
-            selectedValue={discountPercentage}
-            onValueChange={(itemValue, itemIndex) =>
-              setDiscountPercentage(itemValue)
-            }
-            // style={styles.picker}
-          >
-            <Picker.Item label="10%" value={10} />
-            <Picker.Item label="20%" value={20} />
-            <Picker.Item label="30%" value={30} />
-            <Picker.Item label="40%" value={40} />
-          </Picker>
+          <RNPickerSelect
+            onValueChange={(value) => setDiscountPercentage(value)}
+            items={[
+              { label: '10%', value: 10 },
+              { label: '20%', value: 20 },
+              { label: '30%', value: 30 },
+              { label: '40%', value: 40 },
+              { label: '50%', value: 50 },
+            ]}
+            value={discountPercentage}
+            style={{
+              inputIOS: sx({
+                color: 'black',
+                fontSize: 16,
+                paddingVertical: 12,
+                paddingHorizontal: 10,
+                borderRadius: 4,
+                backgroundColor: 'white',
+                borderColor: 'gray',
+                borderWidth: 1,
+                textAlign: 'center',
+              }),
+            }}
+            placeholder={{
+              label: 'Select a Discount',
+              value: null,
+            }}
+          />
 
           <Text sx={styles.inputLabel}>Discount Quantity</Text>
           <TextInput
@@ -329,20 +421,28 @@ const RestaurantDashboard = ({
           />
 
           <Text sx={styles.inputLabel}>Promotion Date and Time</Text>
+          <View sx={{ marginBottom: 10 }}>
+            <Text sx={{ marginBottom: 10 }}>Start Time</Text>
+            <View sx={{ marginBottom: 10 }}>
+              <DateTimePicker
+                date={new Date(promotionStartTime)}
+                mode="datetime"
+                onChange={setPromotionStartTime}
+              />
+            </View>
+            <Text sx={{ marginBottom: 10 }}>End Time</Text>
+            <DateTimePicker
+              date={new Date(promotionEndTime)}
+              mode="datetime"
+              onChange={setPromotionEndTime}
+            />
+          </View>
 
-          <DateTimePicker
-            date={new Date(promotionStartTime)}
-            mode="datetime"
-            onChange={setPromotionStartTime}
-          />
-
-          <DateTimePicker
-            date={new Date(promotionEndTime)}
-            mode="datetime"
-            onChange={setPromotionEndTime}
-          />
-
-          <TextButton onPress={handleSavePromotion}>Save Promotion</TextButton>
+          <View sx={{ marginBottom: 10 }}>
+            <TextButton onPress={handleSavePromotion}>
+              Save Promotion
+            </TextButton>
+          </View>
 
           <TextButton
             title="Cancel"
@@ -397,7 +497,7 @@ const RestaurantDashboard = ({
           </View>
         </Modal>
       )}
-    </View>
+    </ScrollView>
   )
 }
 
@@ -410,9 +510,8 @@ const styles = {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 20,
-    // height: 54,
   },
   titleText: {
     fontSize: 20,
@@ -461,6 +560,7 @@ const styles = {
     height: 54,
     justifyContent: 'center', // Center the picker vertically
     backgroundColor: 'white', // Background color for picker
+    margin: 10,
   },
   headerButtonContainer: {
     flexDirection: 'row', // Keep buttons in a row
@@ -478,13 +578,6 @@ const styles = {
     maxWidth: 200, // Max width for the picker
     height: '100%', // Make the picker fill the height of its container
     backgroundColor: 'white',
-  },
-  chartContainer: {
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    alignItems: 'center',
   },
   promotionsSection: {
     marginBottom: 20,
