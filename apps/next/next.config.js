@@ -12,6 +12,7 @@ const nextConfig = {
     'react-native',
     'react-native-web',
     '@react-native-picker/picker',
+    'react-native-picker-select',
     'solito',
     'dripsy',
     '@dripsy/core',
@@ -19,6 +20,8 @@ const nextConfig = {
     'app',
     'react-native-reanimated',
     '@expo/html-elements',
+    '@nandorojo/heroicons',
+    'react-native-svg',
     'react-native-gesture-handler',
   ],
   images: {}

@@ -7,7 +7,7 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react'
-import { registerUser, loginUser } from 'app/utils/firebaseUtils'
+import { registerUser, loginUser, signOutUser } from 'app/utils/firebaseUtils'
 import { DocumentData } from '@firebase/firestore'
 
 type User = any
@@ -39,6 +39,7 @@ interface AuthContextType {
     phone: string,
     accountType: string
   ) => Promise<void>
+  handleSignOut: () => Promise<void>
   loading: boolean
   error: string | null
 }
@@ -48,6 +49,7 @@ const AuthContext = createContext<AuthContextType>({
   userDetails: null,
   handleLogin: async () => ({ user: null, userDetails: null }),
   handleRegister: async () => {},
+  handleSignOut: async () => {},
   loading: true,
   error: null,
 })
@@ -124,6 +126,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const handleSignOut = async () => {
+    try {
+      setLoading(true);
+      await signOutUser();
+      setCurrentUser(null);
+      setUserDetails(null);
+    } catch (error) {
+      console.error('Sign Out Error:', error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Add an effect to handle the initial loading state
   useEffect(() => {
     // Simulate a check for current authentication session here
@@ -139,6 +155,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         userDetails,
         handleLogin,
         handleRegister,
+        handleSignOut,
         loading,
         error,
       }}

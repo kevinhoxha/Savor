@@ -6,6 +6,7 @@ import { useRouter } from 'solito/router'
 import {
   fetchRestaurantsByUser,
   fetchReservations,
+  cancelReservation,
 } from 'app/utils/firebaseUtils'
 import { Reservation, Restaurant } from 'app/types/schema'
 import { formatDate } from 'app/utils/helperFunctions'
@@ -44,6 +45,20 @@ const AccountScreen = () => {
     }
   }, [currentUser, userDetails])
 
+  const handleCancelReservation = async (reservationId, reservationData) => {
+    try {
+      await cancelReservation(reservationId, reservationData)
+      alert('Reservation cancelled successfully')
+      setReservations((prevState) => ({
+        ...prevState,
+        [reservationId]: {...reservationData, cancelled: true},
+      }))
+    } catch (error) {
+      console.error('Error cancelling reservation:', error)
+      alert('Failed to cancel reservation')
+    }
+  }
+
   return (
     <ScrollView sx={styles.container}>
       <Text sx={styles.header}>Account Information</Text>
@@ -80,15 +95,33 @@ const AccountScreen = () => {
       <View>
         <Text sx={styles.subheader}>Your Reservations:</Text>
         {Object.entries(reservations).map(([id, reservation], index) => (
-          <View key={index} sx={styles.reservationCard}>
-            {/* Probably should be getting restaurant name here but it is a hassle as of rn */}
+          <View
+            key={index}
+            sx={styles.reservationCard}
+            style={{
+              backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
+            }}
+          >
             <Text>Restaurant ID: {reservation.restaurantId}</Text>
             <Text>Promotion ID: {reservation.promotionId}</Text>
             <Text>Discount: {reservation.discount}%</Text>
             <Text>Party Size: {reservation.partySize}</Text>
             <Text>
-              Reservation Time: {formatDate(reservation.reservationTime.toDate())}
+              {`Reservation Time: ${formatDate(
+                reservation.reservationTime.toDate()
+              )}`}
             </Text>
+            {reservation.cancelled ? (
+              <Text sx={styles.cancelledText}>Cancelled</Text>
+            ) : (
+              <TextButton
+                onPress={() => handleCancelReservation(id, reservation)}
+                sx={styles.cancelButton}
+                textProps={{ style: styles.cancelButtonText }}
+              >
+                Cancel Reservation
+              </TextButton>
+            )}
           </View>
         ))}
       </View>
@@ -141,6 +174,20 @@ const styles = {
   },
   changePasswordButton: {
     marginTop: 20,
+  },
+  cancelledText: {
+    color: 'red',
+    fontStyle: 'italic',
+  },
+  cancelButton: {
+    backgroundColor: '#ff6347', // Tomato color for cancel button
+    padding: 8,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontSize: 14,
   },
 }
 

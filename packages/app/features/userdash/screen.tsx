@@ -31,9 +31,12 @@ const UserDashboardScreen = ({
   const router = useRouter()
 
   function handleReserveButton(restaurant, promotion) {
-    setModalVisible(true)
     setCurrentRestaurant(restaurant)
     setCurrentPromotion(promotion)
+    setReservationTime(
+      restaurants[restaurant]!.promotions![promotion]!.startTime.toDate()
+    )
+    setModalVisible(true)
   }
 
   const handleConfirmReservation = async () => {
@@ -56,7 +59,8 @@ const UserDashboardScreen = ({
             .quantityAvailable - partySize,
       }
 
-      restaurants[currentRestaurant]!.promotions![currentPromotion] = newPromotionData
+      restaurants[currentRestaurant]!.promotions![currentPromotion] =
+        newPromotionData
 
       await updatePromotion(currentPromotion, newPromotionData)
 
@@ -213,7 +217,9 @@ const UserDashboardScreen = ({
                     Math.min(
                       8,
                       partySize + 1,
-                      restaurants[currentRestaurant]!.promotions![currentPromotion]!.quantityAvailable
+                      restaurants[currentRestaurant]!.promotions![
+                        currentPromotion
+                      ]!.quantityAvailable
                     )
                   )
                 }
@@ -225,9 +231,7 @@ const UserDashboardScreen = ({
             <Text sx={styles.reservationText}>Reservation Time:</Text>
 
             <DateTimePicker
-              date={restaurants[currentRestaurant]!.promotions![
-                currentPromotion
-              ]!.startTime.toDate()}
+              date={reservationTime}
               mode="datetime"
               onChange={(date) => handleDateTimeChange(date)}
             />

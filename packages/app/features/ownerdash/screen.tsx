@@ -5,11 +5,10 @@ import { useRouter } from 'solito/router'
 import { Text, View, TextInput, useSx, Row, ScrollView } from 'dripsy'
 import RNPickerSelect from 'react-native-picker-select'
 import { TouchableOpacity } from 'react-native'
-import { Picker } from '@react-native-picker/picker'
+import { HeroOutline } from '@nandorojo/heroicons'
 import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
 import Modal from 'app/components/Modal'
-import { ButtonLink, TextButton } from 'app/components/Button'
-import { AntDesign } from '@expo/vector-icons'
+import { TextButton } from 'app/components/Button'
 import moment from 'moment'
 import {
   fetchRestaurantsByUser,
@@ -136,38 +135,19 @@ const RestaurantDashboard = ({
     }
   }
 
-  const handleCancelReservation = async (reservationId, reservation) => {
+  const handleCancelReservation = async (reservationId, reservationData) => {
     try {
-      const { promotionId, restaurantId, createdBy } = reservation
-      await cancelReservation(
-        reservationId,
-        restaurantId,
-        promotionId,
-        createdBy
-      )
+      await cancelReservation(reservationId, reservationData)
       alert('Reservation cancelled successfully')
-      // Update reservations list
-      setReservations((prevReservations: Record<string, Reservation>) =>
-        prevReservations
-          ? Object.fromEntries(
-              Object.entries(prevReservations).filter(
-                ([id, reservation]) => id !== reservationId
-              )
-            )
-          : {}
-      )
+      setReservations((prevState) => ({
+        ...prevState,
+        [reservationId]: {...reservationData, cancelled: true},
+      }))
     } catch (error) {
       console.error('Error cancelling reservation:', error)
       alert('Failed to cancel reservation')
     }
   }
-
-  const restaurantItems = Object.entries(restaurants).map(
-    ([key, restaurant]) => ({
-      label: restaurant.name,
-      value: key,
-    })
-  )
 
   return (
     <ScrollView sx={styles.container}>
@@ -176,7 +156,11 @@ const RestaurantDashboard = ({
           {/* @ts-ignore */}
           <RNPickerSelect
             onValueChange={(value) => setCurrentRestaurant(value)}
-            items={restaurantItems}
+            items={Object.entries(restaurants).map(([key, restaurant]) => ({
+              label: restaurant.name,
+              value: key,
+              key: key,
+            }))}
             value={currentRestaurant}
             style={{
               inputIOS: sx({
@@ -199,7 +183,7 @@ const RestaurantDashboard = ({
         </View>
 
         <TouchableOpacity onPress={() => setIsButtonsVisible(true)}>
-          <AntDesign name="pluscircle" size={24} color="black" />
+          <HeroOutline.ChevronDoubleLeft height={24} width={24} color="black" />
         </TouchableOpacity>
 
         <Modal
@@ -269,7 +253,7 @@ const RestaurantDashboard = ({
             new Date(promo.endTime.seconds * 1000) <= new Date()
           if (!isPastPromotion) {
             return (
-              <View key={index} style={styles.restaurantCard}>
+              <View key={`promo-${index}`} style={styles.restaurantCard}>
                 <View sx={styles.cardHeader}>
                   <Text sx={styles.restaurantName}>{promo.title}</Text>
                   <Text sx={styles.discount}>
@@ -350,7 +334,11 @@ const RestaurantDashboard = ({
           <Text sx={styles.inputLabel}>Restaurant</Text>
           <RNPickerSelect
             onValueChange={(value) => setPromoCurrentRestaurant(value)}
-            items={restaurantItems}
+            items={Object.entries(restaurants).map(([key, restaurant]) => ({
+              label: restaurant.name,
+              value: key,
+              key: key,
+            }))}
             value={promoCurrentRestaurant}
             style={{
               inputIOS: sx({
@@ -469,22 +457,35 @@ const RestaurantDashboard = ({
             <Text sx={styles.titleText}>Reservations for Promotion</Text>
             {Object.entries(reservations).map(
               ([reservationId, reservation], index) => (
-                <View key={index} sx={styles.reservationCard}>
+                <View
+                  key={`reservation-${index}`}
+                  sx={styles.reservationCard}
+                  style={{
+                    backgroundColor: reservation.cancelled
+                      ? '#ffcccc'
+                      : 'white',
+                  }} // Change background color if cancelled
+                >
                   <View sx={styles.reservationDetails}>
                     <Text>Party Size: {reservation.partySize}</Text>
                     <Text>
                       Time: {formatDate(reservation.reservationTime.toDate())}
                     </Text>
+                    {reservation.cancelled && (
+                      <Text sx={styles.cancelledText}>Cancelled</Text> // Indicate cancelled
+                    )}
                   </View>
-                  <TextButton
-                    onPress={() =>
-                      handleCancelReservation(reservationId, reservation)
-                    }
-                    style={styles.cancelButton}
-                    textProps={{ style: styles.cancelButtonText }}
-                  >
-                    Cancel
-                  </TextButton>
+                  {!reservation.cancelled && (
+                    <TextButton
+                      onPress={() =>
+                        handleCancelReservation(reservationId, reservation)
+                      }
+                      style={styles.cancelButton}
+                      textProps={{ style: styles.cancelButtonText }}
+                    >
+                      Cancel
+                    </TextButton>
+                  )}
                 </View>
               )
             )}
@@ -630,6 +631,10 @@ const styles = {
   },
   modal: {
     // Add any specific styles for the modal here
+  },
+  cancelledText: {
+    color: 'red', // Red text color for cancelled reservation
+    fontStyle: 'italic', // Optional: Italicize text to emphasize
   },
   restaurantCard: {
     borderWidth: 1,

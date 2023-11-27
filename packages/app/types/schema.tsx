@@ -24,4 +24,5 @@ export type Reservation = {
     promotionId: string;
     reservationTime: Timestamp;
     restaurantId: string;
+    cancelled?: boolean;
   };

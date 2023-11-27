@@ -2,16 +2,19 @@ import { auth, db } from './firebase'
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signOut
 } from 'firebase/auth'
 import {
   doc,
   setDoc,
   addDoc,
   getDoc,
+  updateDoc,
   collection,
   query,
   getDocs,
   where,
+  increment,
 } from 'firebase/firestore'
 
 export const registerUser = async ({
@@ -84,6 +87,15 @@ export const loginUser = async (email, password) => {
     return { user, userDetails }
   } catch (error) {
     console.error('Error logging in:', error.message)
+    throw error
+  }
+}
+
+export const signOutUser = async () => {
+  try {
+    await signOut(auth)
+  } catch (error) {
+    console.error('Error signing out:', error.message)
     throw error
   }
 }
@@ -177,7 +189,6 @@ export const updatePromotion = async (promotionId, promotionData) => {
 }
 
 export const saveReservation = async (reservationData) => {
-  console.log(reservationData)
   const reservationRef = collection(db, 'reservations')
   const restaurantReservationsRef = collection(
     db,
@@ -261,10 +272,20 @@ export const fetchReservationsByUser = async (userId) => {
   return await fetchCollection(reservationsRef, true)
 }
 
-export const deleteDocumentWithCollection = async (docRef, subCollectionRefs) => {
-
+export const updateReservation = async (reservationId, reservationData) => {
+  try {
+    const reservationRef = doc(db, 'reservations', reservationId)
+    await updateDoc(reservationRef, reservationData)
+  } catch (error) {
+    console.error('Error cancelling reservation:', error)
+    throw error
+  }
 }
 
-export const cancelReservation = async (reservationId, restaurantId, promotionId, userId) => {
-
+export const cancelReservation = async (reservationId, reservationData) => {
+  await updateReservation(reservationId, { cancelled: true })
+  // Update quantity of promotion to reflect cancellation of party
+  await updatePromotion(reservationData.promotionId, {
+    quantityAvailable: increment(reservationData.partySize),
+  })
 }
