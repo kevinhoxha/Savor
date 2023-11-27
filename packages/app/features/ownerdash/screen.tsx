@@ -5,7 +5,7 @@ import { useRouter } from 'solito/router'
 import { Text, View, TextInput, useSx, Row, ScrollView } from 'dripsy'
 import RNPickerSelect from 'react-native-picker-select'
 import { TouchableOpacity } from 'react-native'
-import { HeroOutline } from '@nandorojo/heroicons'
+import { Bars4Icon } from 'react-native-heroicons/outline'
 import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
 import Modal from 'app/components/Modal'
 import { TextButton } from 'app/components/Button'
@@ -183,7 +183,7 @@ const RestaurantDashboard = ({
         </View>
 
         <TouchableOpacity onPress={() => setIsButtonsVisible(true)}>
-          <HeroOutline.ChevronDoubleLeft height={24} width={24} color="black" />
+          <Bars4Icon height={24} width={24} color="black" />
         </TouchableOpacity>
 
         <Modal

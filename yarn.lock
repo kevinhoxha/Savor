@@ -2962,13 +2962,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nandorojo/heroicons@npm:^0.0.5":
-  version: 0.0.5
-  resolution: "@nandorojo/heroicons@npm:0.0.5"
-  checksum: f286bd93560ff6e3f56af841d5e29601ac3ebc62288e9ee34a9180bc5148c919bec459bc0c335d5b1ff6ba447a994ea227ef7bace79b5323d650f66618e2fd9e
-  languageName: node
-  linkType: hard
-
 "@next/env@npm:13.5.6":
   version: 13.5.6
   resolution: "@next/env@npm:13.5.6"
@@ -4991,17 +4984,6 @@ __metadata:
     strip-ansi: ^6.0.0
     wrap-ansi: ^6.2.0
   checksum: 4fcfd26d292c9f00238117f39fc797608292ae36bac2168cfee4c85923817d0607fe21b3329a8621e01aedf512c99b7eaa60e363a671ffd378df6649fb48ae42
-  languageName: node
-  linkType: hard
-
-"cliui@npm:^7.0.2":
-  version: 7.0.4
-  resolution: "cliui@npm:7.0.4"
-  dependencies:
-    string-width: ^4.2.0
-    strip-ansi: ^6.0.0
-    wrap-ansi: ^7.0.0
-  checksum: ce2e8f578a4813806788ac399b9e866297740eecd4ad1823c27fd344d78b22c5f8597d548adbcc46f0573e43e21e751f39446c5a5e804a12aace402b7a315d7f
   languageName: node
   linkType: hard
 
@@ -10773,6 +10755,16 @@ moti@latest:
   languageName: node
   linkType: hard
 
+"react-native-heroicons@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "react-native-heroicons@npm:3.2.0"
+  peerDependencies:
+    react: ">=16.8"
+    react-native-svg: ">=9"
+  checksum: 3d361548ce5ca62569312350adf0a5c957f33152aa05412971fdc60648a31cbc250f1be07376cee8c2535643ec107933f9c54dab44cf4649f91a089b0b737179
+  languageName: node
+  linkType: hard
+
 "react-native-picker-select@npm:^9.0.0":
   version: 9.0.0
   resolution: "react-native-picker-select@npm:9.0.0"
@@ -10838,21 +10830,6 @@ moti@latest:
     react: "*"
     react-native: "*"
   checksum: fd83f7671f44785d7d013db7ae47768e2f415fc9a37ae19b15045693b7c84f7ee0f6ab4ede34b8c8002d94780362448efac4f077c43c9f39f154e03eef3d8207
-  languageName: node
-  linkType: hard
-
-"react-native-vector-icons@npm:^10.0.2":
-  version: 10.0.2
-  resolution: "react-native-vector-icons@npm:10.0.2"
-  dependencies:
-    prop-types: ^15.7.2
-    yargs: ^16.1.1
-  bin:
-    fa-upgrade.sh: bin/fa-upgrade.sh
-    fa5-upgrade: bin/fa5-upgrade.sh
-    fa6-upgrade: bin/fa6-upgrade.sh
-    generate-icon: bin/generate-icon.js
-  checksum: 4ea424fa98c25cdf3e33c590f6e370e0ce0762051a139beb425410eba6e87627e2a68963a025db27130a94d28fbe44299c30471d62555af1654c8c6e4918afb6
   languageName: node
   linkType: hard
 
@@ -11759,7 +11736,6 @@ moti@latest:
   resolution: "solito-expo-router@workspace:."
   dependencies:
     "@firebase/firestore": ^4.3.2
-    "@nandorojo/heroicons": ^0.0.5
     "@react-native-async-storage/async-storage": ^1.19.5
     "@react-native-picker/picker": 2.4.10
     create-react-class: ^15.7.0
@@ -11767,9 +11743,9 @@ moti@latest:
     expo-image: ^1.5.1
     firebase: ^10.6.0
     moment: ^2.29.4
+    react-native-heroicons: ^3.2.0
     react-native-picker-select: ^9.0.0
     react-native-svg: ^14.0.0
-    react-native-vector-icons: ^10.0.2
     react-router-dom: ^6.19.0
     turbo: ^1.4.2
     typescript: ^5.2.2
@@ -13320,13 +13296,6 @@ moti@latest:
   languageName: node
   linkType: hard
 
-"yargs-parser@npm:^20.2.2":
-  version: 20.2.9
-  resolution: "yargs-parser@npm:20.2.9"
-  checksum: 8bb69015f2b0ff9e17b2c8e6bfe224ab463dd00ca211eece72a4cd8a906224d2703fb8a326d36fdd0e68701e201b2a60ed7cf81ce0fd9b3799f9fe7745977ae3
-  languageName: node
-  linkType: hard
-
 "yargs-parser@npm:^21.1.1":
   version: 21.1.1
   resolution: "yargs-parser@npm:21.1.1"
@@ -13350,21 +13319,6 @@ moti@latest:
     y18n: ^4.0.0
     yargs-parser: ^18.1.2
   checksum: 40b974f508d8aed28598087720e086ecd32a5fd3e945e95ea4457da04ee9bdb8bdd17fd91acff36dc5b7f0595a735929c514c40c402416bbb87c03f6fb782373
-  languageName: node
-  linkType: hard
-
-"yargs@npm:^16.1.1":
-  version: 16.2.0
-  resolution: "yargs@npm:16.2.0"
-  dependencies:
-    cliui: ^7.0.2
-    escalade: ^3.1.1
-    get-caller-file: ^2.0.5
-    require-directory: ^2.1.1
-    string-width: ^4.2.0
-    y18n: ^5.0.5
-    yargs-parser: ^20.2.2
-  checksum: b14afbb51e3251a204d81937c86a7e9d4bdbf9a2bcee38226c900d00f522969ab675703bee2a6f99f8e20103f608382936034e64d921b74df82b63c07c5e8f59
   languageName: node
   linkType: hard
 
