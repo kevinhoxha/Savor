@@ -7,13 +7,11 @@ import {
   fetchRestaurantsByUser,
   fetchReservations,
   cancelReservation,
-  signOutUser,
 } from 'app/utils/firebaseUtils'
 import { Reservation, Restaurant } from 'app/types/schema'
 import { formatDate } from 'app/utils/helperFunctions'
-import { signOut } from 'firebase/auth'
 
-const AccountScreen = () => {
+const ReservationScreen = () => {
   const { currentUser, userDetails } = useAuth()
   const [restaurants, setRestaurants] = useState<Record<string, Restaurant>>({})
   const [reservations, setReservations] = useState<Record<string, Reservation>>(
@@ -64,54 +62,66 @@ const AccountScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#ddf4fa' }}>
     <ScrollView sx={styles.container}>
-      <Text sx={styles.header}>Account Information</Text>
-
-      <View sx={styles.infoContainer}>
-        <Text sx={styles.label}>Name:</Text>
-        <Text>
-          {userDetails?.firstName} {userDetails?.lastName}
-        </Text>
-      </View>
-
-      <View sx={styles.infoContainer}>
-        <Text sx={styles.label}>Email:</Text>
-        <Text>{currentUser?.email}</Text>
-      </View>
-
-      <View sx={styles.infoContainer}>
-        <Text sx={styles.label}>Phone Number:</Text>
-        <Text>{userDetails?.phone}</Text>
-      </View>
-
-      {userDetails?.accountType === 'Restaurant Owner' && (
-        <View>
-          <Text sx={styles.subheader}>Your Restaurants:</Text>
-          {Object.entries(restaurants).map(([id, restaurant], index) => (
-            <View key={index} sx={styles.restaurantCard}>
-              <Text>{restaurant.name}</Text>
-              <Text>{restaurant.address}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-      <View sx={{flex: 1, gap: 20, flexDirection: "column"}}>
-      <TextButton
-        onPress={() => {
-          /* Logic to change password */
-        }}
-
-      >
-        Change Password
-      </TextButton>
-
-      <TextButton
-        onPress={() => {
-          signOutUser()
-          router.push('/')
-        }}
-      >
-        Sign Out
-      </TextButton>
+      <View>
+        <Text sx={styles.subheader}>Upcoming Reservations:</Text>
+        {Object.entries(reservations).map(([id, reservation], index) => {
+        const isPastReservation = reservation.reservationTime.toDate() <= new Date()
+        if (isPastReservation) {
+            return null
+        }
+          return <View
+            key={index}
+            sx={styles.reservationCard}
+            style={{
+              backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
+            }}
+          >
+            <Text>Restaurant ID: {reservation.restaurantId}</Text>
+            <Text>
+              {`${formatDate(
+                reservation.reservationTime.toDate()
+              )}`}
+            </Text>
+            <Text>{reservation.discount}% Off | Party of {reservation.partySize}</Text>
+            {reservation.cancelled ? (
+              <Text sx={styles.cancelledText}>Cancelled</Text>
+            ) : (
+              <TextButton
+                onPress={() => handleCancelReservation(id, reservation)}
+                sx={styles.cancelButton}
+                textProps={{ style: styles.cancelButtonText }}
+              >
+                Cancel Reservation
+              </TextButton>
+            )}
+          </View>
+        })}
+        <Text sx={styles.subheader}>Past Reservations:</Text>
+        {Object.entries(reservations).map(([id, reservation], index) => {
+        const isPastReservation = reservation.reservationTime.toDate() <= new Date()
+        if (!isPastReservation) {
+            return null
+        }
+          return <View
+            key={index}
+            sx={styles.reservationCard}
+            style={{
+              backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
+            }}
+          >
+            
+            <Text>Restaurant ID: {reservation.restaurantId}</Text>
+            <Text>
+              {`${formatDate(
+                reservation.reservationTime.toDate()
+              )}`}
+            </Text>
+            <Text>{reservation.discount}% Off | Party of {reservation.partySize}</Text>
+            {reservation.cancelled && (
+              <Text sx={styles.cancelledText}>Cancelled</Text>
+            )}
+          </View>
+        })}
       </View>
     </ScrollView>
     </SafeAreaView>
@@ -171,4 +181,4 @@ const styles = {
   },
 }
 
-export default AccountScreen
+export default ReservationScreen

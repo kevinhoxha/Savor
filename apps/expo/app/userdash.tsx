@@ -3,8 +3,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import UserDashboardScreen from 'app/features/userdash/screen';
 import AccountScreen from 'app/features/account/screen';
 import DateTimePicker from '../components/DateTimePicker';
+import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons'; 
+import ReservationScreen from 'app/features/reservations/screen';
 
 
 
@@ -17,24 +19,28 @@ const screen = (props: any) => {
   })}
   >
       <Tab.Screen
-        name="userdash"
+        name="dashboard"
         options={{ 
         tabBarLabel: 'Home',
         tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" color={color} size={size} />
           ),    
+        unmountOnBlur: true,
         }}
-        component={UserDashboardScreen}
-      />
+      >
+        {() => <UserDashboardScreen DateTimePicker={DateTimePicker}/>}
+        </Tab.Screen>
       <Tab.Screen
-        name="login"
+        name="reservations"
         options={{ 
             tabBarLabel: 'Reservations',
             tabBarIcon: ({ color, size }) => (
                 <FontAwesome5 name="clipboard-list" color={color} size={size} />
-              ),    
+              ),
+            unmountOnBlur: true,
             }}
-        component={AccountScreen}
+        component={ReservationScreen}
+        
       />
       <Tab.Screen
         name="account"
@@ -43,6 +49,7 @@ const screen = (props: any) => {
             tabBarIcon: ({ color, size }) => (
                 <FontAwesome5 name="user" color={color} size={size} />
               ),    
+            unmountOnBlur: true,
             }}
         component={AccountScreen}
       />

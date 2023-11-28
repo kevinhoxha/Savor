@@ -289,3 +289,4 @@ export const cancelReservation = async (reservationId, reservationData) => {
     quantityAvailable: increment(reservationData.partySize),
   })
 }
+

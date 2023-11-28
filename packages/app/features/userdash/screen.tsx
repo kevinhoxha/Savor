@@ -14,6 +14,8 @@ import { useAuth } from 'app/context/AuthContext'
 import { TextButton } from 'app/components/Button'
 import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
 import { formatDate } from 'app/utils/helperFunctions'
+import { SearchBar } from 'react-native-elements';
+import {Image} from 'react-native'
 
 const UserDashboardScreen = ({
   DateTimePicker,
@@ -21,6 +23,7 @@ const UserDashboardScreen = ({
   DateTimePicker: CrossPlatformDateTimePicker
 }) => {
   const [location, setLocation] = useState('')
+  const [restaurantFilter, setRestaurantFilter] = useState('')
   const [restaurants, setRestaurants] = useState<Record<string, Restaurant>>({})
   const [modalVisible, setModalVisible] = useState(false)
   const [partySize, setPartySize] = useState(1)
@@ -113,21 +116,34 @@ const UserDashboardScreen = ({
   }, [currentUser, userDetails])
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#ddf4fa' }}>
-    <ScrollView sx={styles.container}>
+    <SafeAreaView style={styles.container}>
+    <ScrollView stickyHeaderIndices={[0]}>
       <View sx={styles.header}>
-        <TextInput
-          value={location}
-          onChangeText={setLocation}
-          placeholder="Choose location"
-          sx={styles.locationInput}
-        />
-        <TextButton onPress={() => router.push('/account')}>
-          My Account
-        </TextButton>
+      <View sx={{flex: 1, flexDirection: "row", width:'90%', justifyContent: 'space-evenly' }}>
+        <Text>Hello, {userDetails?.firstName}! </Text>
+        <Text>Location: Atlanta, GA </Text>
       </View>
-
-      <View>
+      <SearchBar
+        platform="ios" // or "android"
+        placeholder="Search restaurants..."
+        onChangeText={setLocation}
+        value={location}
+        containerStyle={{
+          backgroundColor: '#ddf4fa',
+          borderBottomColor: 'transparent',
+          borderTopColor: 'transparent',
+          width: '100%',
+        }}
+        inputContainerStyle={{
+          backgroundColor: 'white',
+          borderRadius: 20,
+        }}
+        inputStyle={{
+          color: 'black',
+        }}
+      />
+      </View>
+      <View sx ={{alignItems: 'center'}}>
         {Object.entries(restaurants)
           .filter(([restaurant, data]) => data.promotions)
           .map(([restaurant, data], index) => (
@@ -260,13 +276,16 @@ const UserDashboardScreen = ({
 const styles = {
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
+    backgroundColor: '#ddf4fa'
   },
   header: {
-    flexDirection: 'row',
+    zIndex: 1, // Ensure it stays above other elements
+    flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
+    backgroundColor: '#ddf4fa',
   },
   titleText: {
     fontSize: 20,
@@ -289,6 +308,7 @@ const styles = {
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
+    width: '95%',
   },
   cardHeader: {
     flexDirection: 'row',

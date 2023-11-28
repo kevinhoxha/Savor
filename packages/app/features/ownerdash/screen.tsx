@@ -150,8 +150,8 @@ const RestaurantDashboard = ({
   }
 
   return (
-    <SafeAreaView sx={{ flex: 1, backgroundColor: 'white' }}>
-    <ScrollView sx={styles.container}>
+    <SafeAreaView sx={{ flex: 1, backgroundColor: '#ddf4fa' }}>
+    <ScrollView sx={styles.container} stickyHeaderIndices={[0]}>
       <View sx={{ flexDirection: 'row', alignItems: 'center' }}>
         <View sx={{ flex: 1, marginRight: 10 }}>
           {/* @ts-ignore */}
@@ -507,7 +507,9 @@ const RestaurantDashboard = ({
 const styles = {
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: '#ddf4fa',
+    width: '90%',
+    alignSelf: 'center',
   },
   scrollview: {
     flex: 1,

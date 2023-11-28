@@ -50,6 +50,7 @@ const styles = {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 30,
+    color: '#014c73'
   },
 }
 

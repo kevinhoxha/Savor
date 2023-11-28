@@ -12,6 +12,7 @@ function LoginScreen() {
   const { userDetails, handleLogin } = useAuth()
   const router = useRouter()
   const sx = useSx()
+    
 
   const onLoginPress = async () => {
     try {
@@ -38,12 +39,15 @@ function LoginScreen() {
         style={{ marginBottom: 10, borderRadius: 15 }}
         alt="logo"
       />
+      <Text sx={styles.sectionTitle}>Sign In</Text>
+
       <TextInput
         value={email}
         onChangeText={setEmail}
         placeholder="Email"
         placeholderTextColor="black"
         sx={styles.input}
+        keyboardType='email-address'
       />
       <TextInput
         secureTextEntry={true}
@@ -80,6 +84,12 @@ const styles = {
     borderColor: 'gray',
     borderRadius: 5,
     backgroundColor: 'white',
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#014c73',
+    marginBottom: 10,
   },
 }
 
