@@ -6,6 +6,7 @@ import { Text, View, TextInput, useSx, SafeAreaView } from 'dripsy'
 import { useAuth } from 'app/context/AuthContext'
 import { Picker } from '@react-native-picker/picker'
 import { ButtonLink, TextButton } from 'app/components/Button'
+import {Image} from 'react-native'
 
 function RegisterPage() {
   const [firstName, setFirstName] = useState('')
@@ -43,6 +44,14 @@ function RegisterPage() {
 
   return (
     <SafeAreaView sx={styles.container}>
+      <Image
+        source={{ uri: 'https://i.imgur.com/J2ojaVm.jpeg' }}
+        width={325}
+        height={325}
+        onLayout={() => {}}
+        style={{ marginBottom: 10, borderRadius: 15 }}
+        alt="logo"
+      />
       <TextInput
         value={firstName}
         onChangeText={setFirstName}
@@ -104,7 +113,7 @@ function RegisterPage() {
 const styles = {
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'top',
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#ddf4fa',

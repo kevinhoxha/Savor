@@ -2,19 +2,20 @@ import { useSx, View, Text, SafeAreaView} from 'dripsy'
 import { ButtonLink } from 'app/components/Button'
 import { SolitoImage } from 'solito/image'
 import logo from './assets/logo.jpg'
+import {Image} from 'react-native'
+
 
 export function HomeScreen() {
   const sx = useSx()
 
   return (
     <SafeAreaView sx={styles.container}>
-      <SolitoImage
-        src={logo}
+      <Image
+        source={{ uri: 'https://i.imgur.com/J2ojaVm.jpeg' }}
         width={325}
         height={325}
-        resizeMode="contain"
         onLayout={() => {}}
-        style={{ marginBottom: 30, borderRadius: 15 }}
+        style={{ marginBottom: 10, borderRadius: 15 }}
         alt="logo"
       />
 

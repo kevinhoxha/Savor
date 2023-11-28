@@ -12,7 +12,10 @@ const Tab = createBottomTabNavigator();
 
 const screen = (props: any) => {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
+    <Tab.Navigator screenOptions={({ route }) => ({
+      headerShown: false,
+  })}
+  >
       <Tab.Screen
         name="userdash"
         options={{ 

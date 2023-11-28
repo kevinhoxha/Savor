@@ -113,7 +113,7 @@ const UserDashboardScreen = ({
   }, [currentUser, userDetails])
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#ddf4fa' }}>
     <ScrollView sx={styles.container}>
       <View sx={styles.header}>
         <TextInput
