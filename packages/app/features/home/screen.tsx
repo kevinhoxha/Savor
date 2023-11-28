@@ -1,6 +1,7 @@
 import { useSx, View, Text} from 'dripsy'
 import { ButtonLink } from 'app/components/Button'
 import { SolitoImage } from 'solito/image'
+import logo from './assets/logo.jpg'
 
 export function HomeScreen() {
   const sx = useSx()
@@ -8,14 +9,13 @@ export function HomeScreen() {
   return (
     <View sx={styles.container}>
       <SolitoImage
-        src="/logo.jpg"
+        src={logo}
         width={325}
         height={325}
-        contentFit
+        resizeMode="contain"
         onLayout={() => {}}
         style={{ marginBottom: 30, borderRadius: 15 }}
         alt="logo"
-        resizeMode="contain"
       />
 
       <Text sx={styles.sectionTitle}>Dine for less, today</Text>
