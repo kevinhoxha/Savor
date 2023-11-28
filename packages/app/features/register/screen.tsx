@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'solito/router'
-import { Text, View, TextInput, useSx } from 'dripsy'
+import { Text, View, TextInput, useSx, SafeAreaView } from 'dripsy'
 import { useAuth } from 'app/context/AuthContext'
 import { Picker } from '@react-native-picker/picker'
 import { ButtonLink, TextButton } from 'app/components/Button'
@@ -42,7 +42,7 @@ function RegisterPage() {
   }
 
   return (
-    <View sx={styles.container}>
+    <SafeAreaView sx={styles.container}>
       <TextInput
         value={firstName}
         onChangeText={setFirstName}
@@ -97,7 +97,7 @@ function RegisterPage() {
         <Text>Already have an account?</Text>
         <ButtonLink href="/login">Login</ButtonLink>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -107,17 +107,19 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#ddf4fa',
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
   },
   input: {
-    width: '100%',
+    width: '90%',
     padding: 10,
     marginBottom: 10,
     borderWidth: 1,
     borderRadius: 5,
+    backgroundColor: 'white',
   },
   pickerContainer: {
     flexDirection: 'row',
@@ -133,6 +135,7 @@ const styles = {
     padding: 10,
     borderWidth: 1,
     borderRadius: 5,
+    backgroundColor: 'white',
   },
   linksContainer: {
     marginTop: 20,

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'solito/router'
 import Modal from 'app/components/Modal'
-import { Text, View, TextInput, ScrollView } from 'dripsy'
+import { Text, View, TextInput, ScrollView, SafeAreaView} from 'dripsy'
 import {
   saveReservation,
   fetchRestaurantsWithPromotions,
@@ -113,6 +113,7 @@ const UserDashboardScreen = ({
   }, [currentUser, userDetails])
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
     <ScrollView sx={styles.container}>
       <View sx={styles.header}>
         <TextInput
@@ -252,6 +253,7 @@ const UserDashboardScreen = ({
         </Modal>
       )}
     </ScrollView>
+    </SafeAreaView>
   )
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, useSx, ScrollView } from 'dripsy'
+import { View, Text, useSx, ScrollView, SafeAreaView} from 'dripsy'
 import { ButtonLink, TextButton } from 'app/components/Button'
 import { useAuth } from 'app/context/AuthContext'
 import { useRouter } from 'solito/router'
@@ -60,6 +60,7 @@ const AccountScreen = () => {
   }
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
     <ScrollView sx={styles.container}>
       <Text sx={styles.header}>Account Information</Text>
 
@@ -135,6 +136,7 @@ const AccountScreen = () => {
         Change Password
       </TextButton>
     </ScrollView>
+    </SafeAreaView>
   )
 }
 

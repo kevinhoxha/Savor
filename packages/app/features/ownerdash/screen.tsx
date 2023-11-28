@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'solito/router'
-import { Text, View, TextInput, useSx, Row, ScrollView } from 'dripsy'
+import { Text, View, TextInput, useSx, Row, ScrollView, SafeAreaView } from 'dripsy'
 import RNPickerSelect from 'react-native-picker-select'
 import { TouchableOpacity } from 'react-native'
 import { Bars4Icon } from 'react-native-heroicons/outline'
@@ -150,6 +150,7 @@ const RestaurantDashboard = ({
   }
 
   return (
+    <SafeAreaView sx={{ flex: 1, backgroundColor: 'white' }}>
     <ScrollView sx={styles.container}>
       <View sx={{ flexDirection: 'row', alignItems: 'center' }}>
         <View sx={{ flex: 1, marginRight: 10 }}>
@@ -499,6 +500,7 @@ const RestaurantDashboard = ({
         </Modal>
       )}
     </ScrollView>
+    </SafeAreaView>
   )
 }
 
@@ -506,6 +508,10 @@ const styles = {
   container: {
     flex: 1,
     padding: 20,
+  },
+  scrollview: {
+    flex: 1,
+    paddingTop: 20,
   },
   header: {
     flexDirection: 'row',

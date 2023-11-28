@@ -1,4 +1,4 @@
-import { useSx, View, Text} from 'dripsy'
+import { useSx, View, Text, SafeAreaView} from 'dripsy'
 import { ButtonLink } from 'app/components/Button'
 import { SolitoImage } from 'solito/image'
 import logo from './assets/logo.jpg'
@@ -7,7 +7,7 @@ export function HomeScreen() {
   const sx = useSx()
 
   return (
-    <View sx={styles.container}>
+    <SafeAreaView sx={styles.container}>
       <SolitoImage
         src={logo}
         width={325}
@@ -19,11 +19,11 @@ export function HomeScreen() {
       />
 
       <Text sx={styles.sectionTitle}>Dine for less, today</Text>
-      <View sx={{flex: 1, gap: 40, flexDirection: "row"}}>
+      <View sx={{flex: 1, gap: 40, flexDirection: "column"}}>
         <ButtonLink href="/login">Login</ButtonLink>
         <ButtonLink href="/register">Register</ButtonLink>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -33,6 +33,7 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#ddf4fa',
   },
   logo: {
     marginBottom: 50,

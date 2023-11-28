@@ -29,10 +29,10 @@ export const TextButton = ({
   ...props
 }: TextButtonProps) => {
   const defaultButtonStyle = {
-    backgroundColor: 'blue', // Background color
+    backgroundColor: '#014c73', // Background color
     paddingX: 20, // Horizontal padding
     paddingY: 15, // Vertical padding
-    borderRadius: 10, // Border radius
+    borderRadius: 15, // Border radius
     alignItems: 'center', // Center content horizontally
     justifyContent: 'center', // Center content vertically
     ...style, // Allow custom styles to be passed

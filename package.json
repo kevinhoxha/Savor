@@ -27,6 +27,8 @@
     "@firebase/firestore": "^4.3.2",
     "@react-native-async-storage/async-storage": "^1.19.5",
     "@react-native-picker/picker": "2.4.10",
+    "@react-navigation/bottom-tabs": "^6.5.11",
+    "@react-navigation/stack": "^6.3.20",
     "create-react-class": "^15.7.0",
     "expo-image": "^1.5.1",
     "firebase": "^10.6.0",
