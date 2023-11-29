@@ -66,7 +66,6 @@ const AccountScreen = () => {
       <ScrollView
         style={{ backgroundColor: '#ddf4fa' }}
         sx={styles.container}
-        stickyHeaderIndices={[0]}
       >
         <Text sx={styles.header}>Account Information</Text>
 
