@@ -98,6 +98,7 @@ const AccountScreen = () => {
                     ', ' +
                     restaurant.address.zip}
                 </Text>
+                <Text>Cuisine: {restaurant.cuisine}</Text>
               </View>
             ))}
           </View>
