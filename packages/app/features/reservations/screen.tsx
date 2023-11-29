@@ -67,7 +67,7 @@ const ReservationScreen = () => {
                   backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
                 }}
               >
-                <Text>Restaurant Name: {reservation.restaurantData.name}</Text>
+                <Text sx={{fontSize: 16, fontWeight: 'bold'}}>{reservation.restaurantData.name}</Text>
                 <Text>
                   {`${formatDate(reservation.reservationTime.toDate())}`}
                 </Text>
@@ -103,7 +103,7 @@ const ReservationScreen = () => {
                   backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
                 }}
               >
-                <Text>Restaurant Name: {reservation.restaurantData.name}</Text>
+                <Text sx={{fontSize: 16, fontWeight: 'bold'}}>{reservation.restaurantData.name}</Text>
                 <Text>
                   {`${formatDate(reservation.reservationTime.toDate())}`}
                 </Text>

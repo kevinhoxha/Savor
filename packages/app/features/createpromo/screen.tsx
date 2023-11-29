@@ -110,10 +110,11 @@ const CreatePromotionScreen = ({
                 paddingVertical: 12,
                 paddingHorizontal: 10,
                 borderRadius: 4,
+                marginBottom: 15,
                 backgroundColor: 'white',
                 borderColor: 'gray',
                 borderWidth: 1,
-                textAlign: 'center',
+                textAlign: 'left',
               }),
             }}
             placeholder={{
@@ -151,8 +152,9 @@ const CreatePromotionScreen = ({
                 borderRadius: 4,
                 backgroundColor: 'white',
                 borderColor: 'gray',
+                marginBottom: 15,
                 borderWidth: 1,
-                textAlign: 'center',
+                textAlign: 'left',
               }),
             }}
             placeholder={{
@@ -171,10 +173,8 @@ const CreatePromotionScreen = ({
             sx={styles.textInput}
           />
 
-          <Text sx={styles.inputLabel}>Promotion Date and Time</Text>
-          <View sx={{ marginBottom: 10 }}>
-            <Text sx={{ marginBottom: 10 }}>Start Time</Text>
-            <View sx={{ marginBottom: 10 }}>
+            <Text sx={styles.inputLabel}>Start Time</Text>
+            <View sx={{ marginBottom: 15 }}>
               <DateTimePicker
                 date={new Date(promotionStartTime)}
                 mode="datetime"
@@ -182,16 +182,15 @@ const CreatePromotionScreen = ({
                 sx = {styles.datePicker}
               />
             </View>
-            <Text sx={{ marginBottom: 10 }}>End Time</Text>
+            <Text sx={styles.inputLabel}>End Time</Text>
             <DateTimePicker
               date={new Date(promotionEndTime)}
               mode="datetime"
               onChange={setPromotionEndTime}
               sx = {styles.datePicker}
             />
-          </View>
 
-          <View sx={{ marginBottom: 10 }}>
+          <View sx={{marginTop: 25,  marginBottom: 10 }}>
             <TextButton onPress={handleSavePromotion}>
               Save Promotion
             </TextButton>
@@ -306,6 +305,7 @@ const styles = {
   inputLabel: {
     alignSelf: 'flex-start',
     marginBottom: 5,
+    fontWeight: 'bold',
   },
   textInput: {
     borderWidth: 1,
