@@ -10,16 +10,25 @@ import { TextButton } from 'app/components/Button';
 function RegisterRestaurantScreen() {
   const [restaurantName, setRestaurantName] = useState('');
   const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
   const [cuisine, setCuisine] = useState('');
   const { currentUser } = useAuth(); 
   const router = useRouter();
 
   const handleFinishRegistration = async () => {
     if (currentUser) {
+
       const restaurantData = {
         ownerId: currentUser.uid,
         name: restaurantName,
-        address: address,
+        address: {
+          address: address,
+          city: city,
+          state: state,
+          zip: zip,
+        },
         cuisine: cuisine,
       };
 
@@ -54,6 +63,30 @@ function RegisterRestaurantScreen() {
         value={address}
         onChangeText={setAddress}
         placeholder="Address"
+        placeholderTextColor='black'
+        sx={styles.input}
+      />
+
+      <TextInput
+        value={city}
+        onChangeText={setCity}
+        placeholder="City"
+        placeholderTextColor='black'
+        sx={styles.input}
+      />
+
+      <TextInput
+        value={state}
+        onChangeText={setState}
+        placeholder="State"
+        placeholderTextColor='black'
+        sx={styles.input}
+      />
+
+      <TextInput
+        value={zip}
+        onChangeText={setZip}
+        placeholder="Zip"
         placeholderTextColor='black'
         sx={styles.input}
       />

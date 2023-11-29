@@ -10,7 +10,7 @@ export type Promotion = {
 }
 
 export type Restaurant = {
-  address: string
+  address: Address
   cuisine: string
   name: string
   ownerId: string
@@ -25,4 +25,12 @@ export type Reservation = {
     reservationTime: Timestamp;
     restaurantId: string;
     cancelled?: boolean;
+    restaurantData: Restaurant;
   };
+
+export type Address = {
+  address: string
+  city: string
+  state: string
+  zip: string
+}

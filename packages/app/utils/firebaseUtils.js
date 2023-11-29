@@ -2,7 +2,7 @@ import { auth, db } from './firebase'
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut
+  signOut,
 } from 'firebase/auth'
 import {
   doc,
@@ -216,9 +216,24 @@ export const saveReservation = async (reservationData) => {
   ]).id
 }
 
-export const fetchReservations = async (userId) => {
-  const reservationsRef = collection(db, 'users', userId, 'reservations')
-  return await fetchCollection(reservationsRef, true)
+export const fetchReservationsByUserWithRestaurantData = async (userId) => {
+  const reservations = await fetchReservationsByUser(userId)
+
+  const updatedReservations = {}
+  for (const [id, reservation] of Object.entries(reservations)) {
+    const restaurantRef = doc(db, 'restaurants', reservation.restaurantId)
+    const restaurantSnap = await getDoc(restaurantRef)
+    if (restaurantSnap.exists()) {
+      updatedReservations[id] = {
+        ...reservation,
+        restaurantData: restaurantSnap.data(),
+      }
+    } else {
+      updatedReservations[id] = { ...reservation }
+    }
+  }
+
+  return updatedReservations
 }
 
 export const fetchReservationsByPromotion = async (promotionId) => {
@@ -289,4 +304,3 @@ export const cancelReservation = async (reservationId, reservationData) => {
     quantityAvailable: increment(reservationData.partySize),
   })
 }
-

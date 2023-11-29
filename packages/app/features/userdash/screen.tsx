@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'solito/router'
 import Modal from 'app/components/Modal'
-import { Text, View, TextInput, ScrollView, SafeAreaView} from 'dripsy'
+import { Text, View, TextInput, ScrollView, SafeAreaView } from 'dripsy'
 import {
   saveReservation,
   fetchRestaurantsWithPromotions,
@@ -14,8 +14,9 @@ import { useAuth } from 'app/context/AuthContext'
 import { TextButton } from 'app/components/Button'
 import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
 import { formatDate } from 'app/utils/helperFunctions'
-import { SearchBar } from 'react-native-elements';
-import {Image} from 'react-native'
+import { SearchBar } from 'react-native-elements'
+import RNPickerSelect from 'react-native-picker-select'
+import { Image, TouchableOpacity } from 'react-native'
 
 const UserDashboardScreen = ({
   DateTimePicker,
@@ -24,8 +25,11 @@ const UserDashboardScreen = ({
 }) => {
   const [location, setLocation] = useState('')
   const [restaurantFilter, setRestaurantFilter] = useState('')
+  const [selectedLocation, setSelectedLocation] = useState('Atlanta, GA')
+  const [uniqueLocations, setUniqueLocations] = useState<string[]>([])
   const [restaurants, setRestaurants] = useState<Record<string, Restaurant>>({})
   const [modalVisible, setModalVisible] = useState(false)
+  const [restInfoModalVisible, setRestInfoModalVisible] = useState(false)
   const [partySize, setPartySize] = useState(1)
   const [reservationTime, setReservationTime] = useState(new Date())
   const [currentRestaurant, setCurrentRestaurant] = useState('')
@@ -40,6 +44,11 @@ const UserDashboardScreen = ({
       restaurants[restaurant]!.promotions![promotion]!.startTime.toDate()
     )
     setModalVisible(true)
+  }
+
+  function handleRestInfo(restaurant) {
+    setCurrentRestaurant(restaurant)
+    setRestInfoModalVisible(true)
   }
 
   const handleConfirmReservation = async () => {
@@ -109,166 +118,242 @@ const UserDashboardScreen = ({
     fetchRestaurantsWithPromotions()
       .then((restaurantsWithPromotions) => {
         setRestaurants(restaurantsWithPromotions)
+        const restaurantArray = Object.values(
+          restaurantsWithPromotions as Record<string, Restaurant>
+        )
+        const locations = new Set(
+          restaurantArray.map(
+            (restaurant) =>
+              restaurant.address.city + ', ' + restaurant.address.state
+          )
+        )
+        setUniqueLocations(Array.from(locations))
       })
       .catch((error) => {
         console.error('Error fetching restaurants: ', error)
       })
   }, [currentUser, userDetails])
 
+  const filteredRestaurants = Object.entries(restaurants).filter(
+    ([restaurant, data]) =>
+      data.address.city + ', ' + data.address.state === selectedLocation &&
+      data.name.toLowerCase().includes(restaurantFilter.toLowerCase())
+  )
+
   return (
     <SafeAreaView style={styles.container}>
-    <ScrollView stickyHeaderIndices={[0]}>
-      <View sx={styles.header}>
-      <View sx={{flex: 1, flexDirection: "row", width:'90%', justifyContent: 'space-evenly' }}>
-        <Text>Hello, {userDetails?.firstName}! </Text>
-        <Text>Location: Atlanta, GA </Text>
-      </View>
-      <SearchBar
-        platform="ios" // or "android"
-        placeholder="Search restaurants..."
-        onChangeText={setLocation}
-        value={location}
-        containerStyle={{
-          backgroundColor: '#ddf4fa',
-          borderBottomColor: 'transparent',
-          borderTopColor: 'transparent',
-          width: '100%',
-        }}
-        inputContainerStyle={{
-          backgroundColor: 'white',
-          borderRadius: 20,
-        }}
-        inputStyle={{
-          color: 'black',
-        }}
-      />
-      </View>
-      <View sx ={{alignItems: 'center'}}>
-        {Object.entries(restaurants)
-          .filter(([restaurant, data]) => data.promotions)
-          .map(([restaurant, data], index) => (
-            <View key={index} sx={styles.restaurantCard}>
-              <View sx={styles.cardHeader}>
-                <Text sx={styles.restaurantName}>{data.name}</Text>
-                {/* <Text sx={styles.discount}>{data.discount}</Text> */}
-              </View>
-              <Text sx={styles.restaurantInfo}>{data.address}</Text>
-              <Text sx={styles.restaurantInfo}>{data.cuisine}</Text>
-
-              {/* Display active promotions for the current restaurant */}
-              {restaurants[restaurant]?.promotions && (
-                <View>
-                  {Object.entries(restaurants[restaurant]!.promotions!).map(
-                    ([promotionId, promotion], promoIndex) => {
-                      const isPastPromotion =
-                        promotion.quantityAvailable === 0 ||
-                        new Date(promotion.endTime.seconds * 1000) <= new Date()
-
-                      if (!isPastPromotion) {
-                        return (
-                          <View key={promoIndex} sx={styles.promotionCard}>
-                            <View sx={styles.promotionLeft}>
-                              <Text>{promotion.title}</Text>
-                              <Text>{promotion.discountPercentage}% off</Text>
-                              <Text sx={styles.discount}>
-                                {promotion.quantityAvailable} Remaining
-                              </Text>
-                            </View>
-
-                            <View sx={styles.promotionRight}>
-                              <TextButton
-                                onPress={() =>
-                                  handleReserveButton(restaurant, promotionId)
-                                }
-                              >
-                                Reserve
-                              </TextButton>
-                            </View>
-                          </View>
-                        )
-                      }
-                    }
-                  )}
-                </View>
-              )}
-            </View>
-          ))}
-      </View>
-
-      {modalVisible && (
-        <Modal
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(!modalVisible)}
-        >
-          <View sx={styles.modalView}>
-            <Text sx={styles.titleText}>Reservation Details</Text>
-
-            <Text sx={styles.reservationText}>
-              Restaurant Name: {restaurants[currentRestaurant]!.name}
-            </Text>
-
-            <Text sx={styles.reservationText}>
-              {
-                restaurants[currentRestaurant]!.promotions![currentPromotion]!
-                  .discountPercentage
-              }
-              % off
-            </Text>
-
-            <View sx={styles.partySizeContainer}>
-              <Text sx={styles.reservationText}>Party Size: </Text>
-              <TextButton
-                onPress={() => setPartySize(Math.max(1, partySize - 1))}
-              >
-                -
-              </TextButton>
-              <TextInput
-                sx={styles.partySizeInput}
-                value={partySize ? partySize.toString() : ''}
-                onChangeText={(text) => setPartySize(parseInt(text))}
-                keyboardType="numeric"
+      <ScrollView stickyHeaderIndices={[0]}>
+        <View sx={styles.header}>
+          <View
+            sx={{
+              flex: 1,
+              flexDirection: 'row',
+              width: '90%',
+              justifyContent: 'space-evenly',
+            }}
+          >
+            <Text>Hello, {userDetails?.firstName}! </Text>
+            <View>
+              <Text>Location:</Text>
+              <RNPickerSelect
+                onValueChange={(value) => setSelectedLocation(value)}
+                items={uniqueLocations.map(location => ({
+                  label: location,
+                  value: location,
+                }))}
+                placeholder={{ label: 'Select a location', value: null }}
+                value={selectedLocation}
               />
-              <TextButton
-                onPress={() =>
-                  setPartySize(
-                    Math.min(
-                      8,
-                      partySize + 1,
-                      restaurants[currentRestaurant]!.promotions![
-                        currentPromotion
-                      ]!.quantityAvailable
-                    )
-                  )
+            </View>
+          </View>
+          <SearchBar
+            platform="ios" // or "android"
+            placeholder="Search restaurants..."
+            onChangeText={setLocation}
+            value={location}
+            containerStyle={{
+              backgroundColor: '#ddf4fa',
+              borderBottomColor: 'transparent',
+              borderTopColor: 'transparent',
+              width: '100%',
+            }}
+            inputContainerStyle={{
+              backgroundColor: 'white',
+              borderRadius: 20,
+            }}
+            inputStyle={{
+              color: 'black',
+            }}
+          />
+        </View>
+        <View sx={{ alignItems: 'center' }}>
+          {filteredRestaurants
+            .filter(([restaurant, data]) => data.promotions)
+            .map(([restaurant, data], index) => (
+              <View key={index} sx={styles.restaurantCard}>
+                <View sx={styles.cardHeader}>
+                  <TouchableOpacity onPress={() => handleRestInfo(restaurant)}>
+                    <Text sx={styles.restaurantName}>{data.name}</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text sx={styles.restaurantInfo}>{data.address.city}</Text>
+                <Text sx={styles.restaurantInfo}>{data.cuisine}</Text>
+
+                {/* Display active promotions for the current restaurant */}
+                {restaurants[restaurant]?.promotions && (
+                  <View>
+                    {Object.entries(restaurants[restaurant]!.promotions!).map(
+                      ([promotionId, promotion], promoIndex) => {
+                        const isPastPromotion =
+                          promotion.quantityAvailable === 0 ||
+                          new Date(promotion.endTime.seconds * 1000) <=
+                            new Date()
+
+                        if (!isPastPromotion) {
+                          return (
+                            <View key={promoIndex} sx={styles.promotionCard}>
+                              <View sx={styles.promotionLeft}>
+                                <Text>{promotion.title}</Text>
+                                <Text>{promotion.discountPercentage}% off</Text>
+                                <Text sx={styles.discount}>
+                                  {promotion.quantityAvailable} Remaining
+                                </Text>
+                              </View>
+
+                              <View sx={styles.promotionRight}>
+                                <TextButton
+                                  onPress={() =>
+                                    handleReserveButton(restaurant, promotionId)
+                                  }
+                                >
+                                  Reserve
+                                </TextButton>
+                              </View>
+                            </View>
+                          )
+                        }
+                      }
+                    )}
+                  </View>
+                )}
+              </View>
+            ))}
+        </View>
+
+        {modalVisible && (
+          <Modal
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(!modalVisible)}
+          >
+            <View sx={styles.modalView}>
+              <Text sx={styles.titleText}>Reservation Details</Text>
+
+              <Text sx={styles.reservationText}>
+                Restaurant Name: {restaurants[currentRestaurant]!.name}
+              </Text>
+
+              <Text sx={styles.reservationText}>
+                {
+                  restaurants[currentRestaurant]!.promotions![currentPromotion]!
+                    .discountPercentage
                 }
+                % off
+              </Text>
+
+              <View sx={styles.partySizeContainer}>
+                <Text sx={styles.reservationText}>Party Size: </Text>
+                <TextButton
+                  onPress={() => setPartySize(Math.max(1, partySize - 1))}
+                >
+                  -
+                </TextButton>
+                <TextInput
+                  sx={styles.partySizeInput}
+                  value={partySize ? partySize.toString() : ''}
+                  onChangeText={(text) => setPartySize(parseInt(text))}
+                  keyboardType="numeric"
+                />
+                <TextButton
+                  onPress={() =>
+                    setPartySize(
+                      Math.min(
+                        8,
+                        partySize + 1,
+                        restaurants[currentRestaurant]!.promotions![
+                          currentPromotion
+                        ]!.quantityAvailable
+                      )
+                    )
+                  }
+                >
+                  +
+                </TextButton>
+              </View>
+
+              <Text sx={styles.reservationText}>Reservation Time:</Text>
+
+              <DateTimePicker
+                date={reservationTime}
+                mode="datetime"
+                onChange={(date) => handleDateTimeChange(date)}
+              />
+
+              <TextButton onPress={handleConfirmReservation}>
+                Confirm Reservation
+              </TextButton>
+
+              <TextButton
+                title="Cancel"
+                onPress={() => {
+                  setModalVisible(false)
+                }}
               >
-                +
+                Cancel
               </TextButton>
             </View>
+          </Modal>
+        )}
 
-            <Text sx={styles.reservationText}>Reservation Time:</Text>
+        {restInfoModalVisible && (
+          <Modal
+            visible={restInfoModalVisible}
+            onRequestClose={() =>
+              setRestInfoModalVisible(!restInfoModalVisible)
+            }
+          >
+            <View sx={styles.modalView}>
+              <Text sx={styles.titleText}>Restaurant Information</Text>
+              <View>
+                <Text>Name: {restaurants[currentRestaurant]!.name}</Text>
+              </View>
+              <View>
+                <Text>
+                  Address:{' '}
+                  {restaurants[currentRestaurant]!.address.address +
+                    ' ' +
+                    restaurants[currentRestaurant]!.address.city +
+                    ', ' +
+                    restaurants[currentRestaurant]!.address.state +
+                    ', ' +
+                    restaurants[currentRestaurant]!.address.zip}
+                </Text>
+              </View>
+              <View>
+                <Text>Cuisine: {restaurants[currentRestaurant]!.cuisine}</Text>
+              </View>
 
-            <DateTimePicker
-              date={reservationTime}
-              mode="datetime"
-              onChange={(date) => handleDateTimeChange(date)}
-            />
-
-            <TextButton onPress={handleConfirmReservation}>
-              Confirm Reservation
-            </TextButton>
-
-            <TextButton
-              title="Cancel"
-              onPress={() => {
-                setModalVisible(false)
-              }}
-            >
-              Cancel
-            </TextButton>
-          </View>
-        </Modal>
-      )}
-    </ScrollView>
+              <TextButton
+                title="Close"
+                onPress={() => {
+                  setRestInfoModalVisible(false)
+                }}
+              >
+                Cancel
+              </TextButton>
+            </View>
+          </Modal>
+        )}
+      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -277,7 +362,7 @@ const styles = {
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#ddf4fa'
+    backgroundColor: '#ddf4fa',
   },
   header: {
     zIndex: 1, // Ensure it stays above other elements

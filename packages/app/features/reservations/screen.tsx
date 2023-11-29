@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, useSx, ScrollView, SafeAreaView} from 'dripsy'
+import { View, Text, useSx, ScrollView, SafeAreaView } from 'dripsy'
 import { ButtonLink, TextButton } from 'app/components/Button'
 import { useAuth } from 'app/context/AuthContext'
 import { useRouter } from 'solito/router'
 import {
-  fetchRestaurantsByUser,
-  fetchReservations,
+  fetchReservationsByUserWithRestaurantData,
   cancelReservation,
 } from 'app/utils/firebaseUtils'
 import { Reservation, Restaurant } from 'app/types/schema'
@@ -13,7 +12,6 @@ import { formatDate } from 'app/utils/helperFunctions'
 
 const ReservationScreen = () => {
   const { currentUser, userDetails } = useAuth()
-  const [restaurants, setRestaurants] = useState<Record<string, Restaurant>>({})
   const [reservations, setReservations] = useState<Record<string, Reservation>>(
     {}
   )
@@ -27,23 +25,14 @@ const ReservationScreen = () => {
       return
     }
 
-    fetchReservations(currentUser.uid)
+    fetchReservationsByUserWithRestaurantData(currentUser.uid)
       .then((myReservations) => {
         setReservations(myReservations as Record<string, Reservation>)
       })
       .catch((error) => {
         console.error('Error fetching reservations: ', error)
       })
-    if (userDetails?.accountType === 'Restaurant Owner') {
-      fetchRestaurantsByUser(currentUser.uid)
-        .then((ownedRestaurants) => {
-          setRestaurants(ownedRestaurants as Record<string, Restaurant>)
-        })
-        .catch((error) => {
-          console.error('Error fetching restaurants: ', error)
-        })
-    }
-  }, [currentUser, userDetails])
+  }, [currentUser])
 
   const handleCancelReservation = async (reservationId, reservationData) => {
     try {
@@ -51,7 +40,7 @@ const ReservationScreen = () => {
       alert('Reservation cancelled successfully')
       setReservations((prevState) => ({
         ...prevState,
-        [reservationId]: {...reservationData, cancelled: true},
+        [reservationId]: { ...reservationData, cancelled: true },
       }))
     } catch (error) {
       console.error('Error cancelling reservation:', error)
@@ -61,69 +50,74 @@ const ReservationScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#ddf4fa' }}>
-    <ScrollView sx={styles.container}>
-      <View>
-        <Text sx={styles.subheader}>Upcoming Reservations:</Text>
-        {Object.entries(reservations).map(([id, reservation], index) => {
-        const isPastReservation = reservation.reservationTime.toDate() <= new Date()
-        if (isPastReservation) {
-            return null
-        }
-          return <View
-            key={index}
-            sx={styles.reservationCard}
-            style={{
-              backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
-            }}
-          >
-            <Text>Restaurant ID: {reservation.restaurantId}</Text>
-            <Text>
-              {`${formatDate(
-                reservation.reservationTime.toDate()
-              )}`}
-            </Text>
-            <Text>{reservation.discount}% Off | Party of {reservation.partySize}</Text>
-            {reservation.cancelled ? (
-              <Text sx={styles.cancelledText}>Cancelled</Text>
-            ) : (
-              <TextButton
-                onPress={() => handleCancelReservation(id, reservation)}
-                sx={styles.cancelButton}
-                textProps={{ style: styles.cancelButtonText }}
+      <ScrollView sx={styles.container}>
+        <View>
+          <Text sx={styles.subheader}>Upcoming Reservations:</Text>
+          {Object.entries(reservations).map(([id, reservation], index) => {
+            const isPastReservation =
+              reservation.reservationTime.toDate() <= new Date()
+            if (isPastReservation) {
+              return null
+            }
+            return (
+              <View
+                key={index}
+                sx={styles.reservationCard}
+                style={{
+                  backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
+                }}
               >
-                Cancel Reservation
-              </TextButton>
-            )}
-          </View>
-        })}
-        <Text sx={styles.subheader}>Past Reservations:</Text>
-        {Object.entries(reservations).map(([id, reservation], index) => {
-        const isPastReservation = reservation.reservationTime.toDate() <= new Date()
-        if (!isPastReservation) {
-            return null
-        }
-          return <View
-            key={index}
-            sx={styles.reservationCard}
-            style={{
-              backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
-            }}
-          >
-            
-            <Text>Restaurant ID: {reservation.restaurantId}</Text>
-            <Text>
-              {`${formatDate(
-                reservation.reservationTime.toDate()
-              )}`}
-            </Text>
-            <Text>{reservation.discount}% Off | Party of {reservation.partySize}</Text>
-            {reservation.cancelled && (
-              <Text sx={styles.cancelledText}>Cancelled</Text>
-            )}
-          </View>
-        })}
-      </View>
-    </ScrollView>
+                <Text>Restaurant Name: {reservation.restaurantData.name}</Text>
+                <Text>
+                  {`${formatDate(reservation.reservationTime.toDate())}`}
+                </Text>
+                <Text>
+                  {reservation.discount}% Off | Party of {reservation.partySize}
+                </Text>
+                {reservation.cancelled ? (
+                  <Text sx={styles.cancelledText}>Cancelled</Text>
+                ) : (
+                  <TextButton
+                    onPress={() => handleCancelReservation(id, reservation)}
+                    sx={styles.cancelButton}
+                    textProps={{ style: styles.cancelButtonText }}
+                  >
+                    Cancel Reservation
+                  </TextButton>
+                )}
+              </View>
+            )
+          })}
+          <Text sx={styles.subheader}>Past Reservations:</Text>
+          {Object.entries(reservations).map(([id, reservation], index) => {
+            const isPastReservation =
+              reservation.reservationTime.toDate() <= new Date()
+            if (!isPastReservation) {
+              return null
+            }
+            return (
+              <View
+                key={index}
+                sx={styles.reservationCard}
+                style={{
+                  backgroundColor: reservation.cancelled ? '#ffcccc' : 'white',
+                }}
+              >
+                <Text>Restaurant Name: {reservation.restaurantData.name}</Text>
+                <Text>
+                  {`${formatDate(reservation.reservationTime.toDate())}`}
+                </Text>
+                <Text>
+                  {reservation.discount}% Off | Party of {reservation.partySize}
+                </Text>
+                {reservation.cancelled && (
+                  <Text sx={styles.cancelledText}>Cancelled</Text>
+                )}
+              </View>
+            )
+          })}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }

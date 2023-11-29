@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, useSx, ScrollView, SafeAreaView} from 'dripsy'
+import { View, Text, useSx, ScrollView, SafeAreaView } from 'dripsy'
 import { ButtonLink, TextButton } from 'app/components/Button'
 import { useAuth } from 'app/context/AuthContext'
 import { useRouter } from 'solito/router'
 import {
   fetchRestaurantsByUser,
-  fetchReservations,
+  fetchReservationsByUserWithRestaurantData,
   cancelReservation,
   signOutUser,
 } from 'app/utils/firebaseUtils'
@@ -29,7 +29,7 @@ const AccountScreen = () => {
       return
     }
 
-    fetchReservations(currentUser.uid)
+    fetchReservationsByUserWithRestaurantData(currentUser.uid)
       .then((myReservations) => {
         setReservations(myReservations as Record<string, Reservation>)
       })
@@ -53,7 +53,7 @@ const AccountScreen = () => {
       alert('Reservation cancelled successfully')
       setReservations((prevState) => ({
         ...prevState,
-        [reservationId]: {...reservationData, cancelled: true},
+        [reservationId]: { ...reservationData, cancelled: true },
       }))
     } catch (error) {
       console.error('Error cancelling reservation:', error)
@@ -63,57 +63,64 @@ const AccountScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#ddf4fa' }}>
-    <ScrollView sx={styles.container}>
-      <Text sx={styles.header}>Account Information</Text>
+      <ScrollView sx={styles.container}>
+        <Text sx={styles.header}>Account Information</Text>
 
-      <View sx={styles.infoContainer}>
-        <Text sx={styles.label}>Name:</Text>
-        <Text>
-          {userDetails?.firstName} {userDetails?.lastName}
-        </Text>
-      </View>
-
-      <View sx={styles.infoContainer}>
-        <Text sx={styles.label}>Email:</Text>
-        <Text>{currentUser?.email}</Text>
-      </View>
-
-      <View sx={styles.infoContainer}>
-        <Text sx={styles.label}>Phone Number:</Text>
-        <Text>{userDetails?.phone}</Text>
-      </View>
-
-      {userDetails?.accountType === 'Restaurant Owner' && (
-        <View>
-          <Text sx={styles.subheader}>Your Restaurants:</Text>
-          {Object.entries(restaurants).map(([id, restaurant], index) => (
-            <View key={index} sx={styles.restaurantCard}>
-              <Text>{restaurant.name}</Text>
-              <Text>{restaurant.address}</Text>
-            </View>
-          ))}
+        <View sx={styles.infoContainer}>
+          <Text sx={styles.label}>Name:</Text>
+          <Text>
+            {userDetails?.firstName} {userDetails?.lastName}
+          </Text>
         </View>
-      )}
-      <View sx={{flex: 1, gap: 20, flexDirection: "column"}}>
-      <TextButton
-        onPress={() => {
-          /* Logic to change password */
-        }}
 
-      >
-        Change Password
-      </TextButton>
+        <View sx={styles.infoContainer}>
+          <Text sx={styles.label}>Email:</Text>
+          <Text>{currentUser?.email}</Text>
+        </View>
 
-      <TextButton
-        onPress={() => {
-          signOutUser()
-          router.push('/')
-        }}
-      >
-        Sign Out
-      </TextButton>
-      </View>
-    </ScrollView>
+        <View sx={styles.infoContainer}>
+          <Text sx={styles.label}>Phone Number:</Text>
+          <Text>{userDetails?.phone}</Text>
+        </View>
+
+        {userDetails?.accountType === 'Restaurant Owner' && (
+          <View>
+            <Text sx={styles.subheader}>Your Restaurants:</Text>
+            {Object.entries(restaurants).map(([id, restaurant], index) => (
+              <View key={index} sx={styles.restaurantCard}>
+                <Text>{restaurant.name}</Text>
+                <Text>
+                  {restaurant.address.address +
+                    ' ' +
+                    restaurant.address.city +
+                    ', ' +
+                    restaurant.address.state +
+                    ', ' +
+                    restaurant.address.zip}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+        <View sx={{ flex: 1, gap: 20, flexDirection: 'column' }}>
+          <TextButton
+            onPress={() => {
+              /* Logic to change password */
+            }}
+          >
+            Change Password
+          </TextButton>
+
+          <TextButton
+            onPress={() => {
+              signOutUser()
+              router.push('/')
+            }}
+          >
+            Sign Out
+          </TextButton>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }
