@@ -276,7 +276,7 @@ const UserDashboardScreen = ({
                                         <TextButton
                                           onPress={() =>
                                             handleReserveButton(
-                                              restaurant.id,
+                                              restaurant.id!,
                                               promotionId
                                             )
                                           }
@@ -308,7 +308,7 @@ const UserDashboardScreen = ({
               <Text sx={styles.titleText}>Reservation Details</Text>
 
               <Text sx={styles.reservationText}>
-                Restaurant Name: {restaurants[currentRestaurant]!.name}
+                {restaurants[currentRestaurant]!.name}
               </Text>
 
               <Text sx={styles.reservationText}>
@@ -320,8 +320,8 @@ const UserDashboardScreen = ({
               </Text>
 
               <View sx={styles.partySizeContainer}>
-                <Text sx={styles.reservationText}>Party Size: </Text>
                 <TextButton
+                style = {{paddingX: 12, paddingY: 8, marginBottom: 10}}
                   onPress={() => setPartySize(Math.max(1, partySize - 1))}
                 >
                   -
@@ -333,6 +333,7 @@ const UserDashboardScreen = ({
                   keyboardType="numeric"
                 />
                 <TextButton
+                style = {{paddingX: 12, paddingY: 8, marginBottom: 10}}
                   onPress={() =>
                     setPartySize(
                       Math.min(
@@ -349,15 +350,14 @@ const UserDashboardScreen = ({
                 </TextButton>
               </View>
 
-              <Text sx={styles.reservationText}>Reservation Time:</Text>
-
               <DateTimePicker
+                style = {{marginBottom: 10, backgroundColor: 'white'}}
                 date={reservationTime}
                 mode="datetime"
                 onChange={(date) => handleDateTimeChange(date)}
               />
 
-              <TextButton onPress={handleConfirmReservation}>
+              <TextButton style = {{marginBottom: 10}} onPress={handleConfirmReservation}>
                 Confirm Reservation
               </TextButton>
 
