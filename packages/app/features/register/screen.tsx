@@ -5,8 +5,9 @@ import { useRouter } from 'solito/router'
 import { Text, View, TextInput, useSx, SafeAreaView } from 'dripsy'
 import { useAuth } from 'app/context/AuthContext'
 import { Picker } from '@react-native-picker/picker'
+import RNPickerSelect from 'react-native-picker-select'
 import { ButtonLink, TextButton } from 'app/components/Button'
-import {Image} from 'react-native'
+import { Image } from 'react-native'
 
 function RegisterPage() {
   const [firstName, setFirstName] = useState('')
@@ -92,19 +93,33 @@ function RegisterPage() {
       />
       <View sx={styles.pickerContainer}>
         <Text style={styles.label}>Account Type:</Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={accountType}
-          onValueChange={(itemValue) => setAccountType(itemValue)}
-        >
-          <Picker.Item label="Diner" value="Diner" />
-          <Picker.Item label="Restaurant Owner" value="Restaurant Owner" />
-        </Picker>
+        <RNPickerSelect
+          style={{
+            inputIOS: {
+              height: 40,
+              width: 200,
+              padding: 10,
+              borderWidth: 1,
+              borderRadius: 5,
+              backgroundColor: 'white',
+              textAlign: 'center',
+            },
+          }}
+          onValueChange={(value) => setAccountType(value)}
+          items={[
+            { label: 'Diner', value: 'Diner' },
+            { label: 'Restaurant Owner', value: 'Restaurant Owner' },
+          ]}
+          placeholder={{ label: 'Select a user type', value: null }}
+          value={accountType}
+        />
       </View>
-      <TextButton onPress={onRegisterPress}>Register</TextButton>
-      <View sx={styles.loginCotainer}>
-        <Text>Already have an account?</Text>
-        <ButtonLink href="/login">Login</ButtonLink>
+      <View>
+        <TextButton onPress={onRegisterPress}>Register</TextButton>
+        <View sx={styles.loginCotainer}>
+          <Text>Already have an account?</Text>
+          <ButtonLink href="/login">Login</ButtonLink>
+        </View>
       </View>
     </SafeAreaView>
   )
@@ -138,13 +153,6 @@ const styles = {
   },
   label: {
     marginRight: 10,
-  },
-  picker: {
-    height: 40,
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 5,
-    backgroundColor: 'white',
   },
   linksContainer: {
     marginTop: 20,
