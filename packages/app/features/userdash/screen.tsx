@@ -9,14 +9,18 @@ import {
   fetchRestaurantsWithPromotions,
   updatePromotion,
 } from 'app/utils/firebaseUtils'
-import { Restaurant } from 'app/types/schema'
+import { Promotion, Restaurant } from 'app/types/schema'
 import { useAuth } from 'app/context/AuthContext'
 import { TextButton } from 'app/components/Button'
 import { CrossPlatformDateTimePicker } from 'app/types/dateTimePicker'
-import { formatDate } from 'app/utils/helperFunctions'
+import {
+  formatDate,
+  groupRestaurantsByCuisine,
+} from 'app/utils/helperFunctions'
 import { SearchBar } from 'react-native-elements'
 import RNPickerSelect from 'react-native-picker-select'
 import { Image, TouchableOpacity } from 'react-native'
+import { SolitoImage } from 'solito/image'
 
 const UserDashboardScreen = ({
   DateTimePicker,
@@ -28,12 +32,13 @@ const UserDashboardScreen = ({
   const [selectedLocation, setSelectedLocation] = useState('Atlanta, GA')
   const [uniqueLocations, setUniqueLocations] = useState<string[]>([])
   const [restaurants, setRestaurants] = useState<Record<string, Restaurant>>({})
-  const [modalVisible, setModalVisible] = useState(false)
-  const [restInfoModalVisible, setRestInfoModalVisible] = useState(false)
-  const [partySize, setPartySize] = useState(1)
-  const [reservationTime, setReservationTime] = useState(new Date())
-  const [currentRestaurant, setCurrentRestaurant] = useState('')
-  const [currentPromotion, setCurrentPromotion] = useState('')
+  const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const [restInfoModalVisible, setRestInfoModalVisible] =
+    useState<boolean>(false)
+  const [partySize, setPartySize] = useState<number>(1)
+  const [reservationTime, setReservationTime] = useState<Date>(new Date())
+  const [currentRestaurant, setCurrentRestaurant] = useState<string>('')
+  const [currentPromotion, setCurrentPromotion] = useState<string>('')
   const { currentUser, userDetails } = useAuth()
   const router = useRouter()
 
@@ -49,6 +54,10 @@ const UserDashboardScreen = ({
   function handleRestInfo(restaurant) {
     setCurrentRestaurant(restaurant)
     setRestInfoModalVisible(true)
+  }
+
+  function updateSearch(text: string) {
+    setLocation(text)
   }
 
   const handleConfirmReservation = async () => {
@@ -140,6 +149,8 @@ const UserDashboardScreen = ({
       data.name.toLowerCase().includes(restaurantFilter.toLowerCase())
   )
 
+  const groupedRestaurants = groupRestaurantsByCuisine(filteredRestaurants)
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView stickyHeaderIndices={[0]}>
@@ -157,7 +168,7 @@ const UserDashboardScreen = ({
               <Text>Location:</Text>
               <RNPickerSelect
                 onValueChange={(value) => setSelectedLocation(value)}
-                items={uniqueLocations.map(location => ({
+                items={uniqueLocations.map((location) => ({
                   label: location,
                   value: location,
                 }))}
@@ -166,10 +177,11 @@ const UserDashboardScreen = ({
               />
             </View>
           </View>
+          {/* @ts-ignore */}
           <SearchBar
             platform="ios" // or "android"
             placeholder="Search restaurants..."
-            onChangeText={setLocation}
+            onChangeText={updateSearch as any}
             value={location}
             containerStyle={{
               backgroundColor: '#ddf4fa',
@@ -186,58 +198,97 @@ const UserDashboardScreen = ({
             }}
           />
         </View>
-        <View sx={{ alignItems: 'center' }}>
-          {filteredRestaurants
-            .filter(([restaurant, data]) => data.promotions)
-            .map(([restaurant, data], index) => (
-              <View key={index} sx={styles.restaurantCard}>
-                <View sx={styles.cardHeader}>
-                  <TouchableOpacity onPress={() => handleRestInfo(restaurant)}>
-                    <Text sx={styles.restaurantName}>{data.name}</Text>
-                  </TouchableOpacity>
+        <View sx={{ alignItems: 'center', gap: 15 }}>
+          {groupedRestaurants &&
+            Object.entries(groupedRestaurants).map(
+              ([cuisine, restaurants]: [string, Restaurant[]]) => (
+                <View
+                  key={cuisine}
+                  sx={{ flex: 1, paddingLeft: 10, paddingRight: 10 }}
+                >
+                  <Text sx={styles.cuisineHeader}>{cuisine}</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {restaurants.map((restaurant, index) => (
+                      <View key={index} sx={styles.restaurantCard}>
+                        {restaurant && ( // normally should be a uri link but this works for now
+                          <SolitoImage
+                            src={`./assets/restaurants/${restaurant.id}.jpg`}
+                            style={styles.restaurantImage}
+                            width={300}
+                            height={200}
+                            alt={restaurant.name}
+                          />
+                        )}
+                        <View sx={styles.cardHeader}>
+                          <TouchableOpacity
+                            onPress={() => handleRestInfo(restaurant)}
+                          >
+                            <Text sx={styles.restaurantName}>
+                              {restaurant.name}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                        <Text sx={styles.restaurantInfo}>
+                          {restaurant.address.city}
+                        </Text>
+
+                        {/* Display active promotions for the current restaurant */}
+                        {restaurant.promotions && (
+                          <View>
+                            {Object.entries(
+                              restaurant.promotions!
+                            ).map(
+                              (
+                                [promotionId, promotion]: [string, Promotion],
+                                promoIndex
+                              ) => {
+                                const isPastPromotion =
+                                  promotion.quantityAvailable === 0 ||
+                                  new Date(promotion.endTime.seconds * 1000) <=
+                                    new Date()
+
+                                if (!isPastPromotion) {
+                                  return (
+                                    <View
+                                      key={promoIndex}
+                                      sx={styles.promotionCard}
+                                    >
+                                      <View sx={styles.promotionLeft}>
+                                        <Text>{promotion.title}</Text>
+                                        <Text>
+                                          {promotion.discountPercentage}% off
+                                        </Text>
+                                        <Text sx={styles.discount}>
+                                          {promotion.quantityAvailable}{' '}
+                                          Remaining
+                                        </Text>
+                                      </View>
+
+                                      <View sx={styles.promotionRight}>
+                                        <TextButton
+                                          onPress={() =>
+                                            handleReserveButton(
+                                              restaurant,
+                                              promotionId
+                                            )
+                                          }
+                                        >
+                                          Reserve
+                                        </TextButton>
+                                      </View>
+                                    </View>
+                                  )
+                                }
+                              }
+                            )}
+                          </View>
+                        )}
+                      </View>
+                    ))}
+                  </ScrollView>
                 </View>
-                <Text sx={styles.restaurantInfo}>{data.address.city}</Text>
-                <Text sx={styles.restaurantInfo}>{data.cuisine}</Text>
-
-                {/* Display active promotions for the current restaurant */}
-                {restaurants[restaurant]?.promotions && (
-                  <View>
-                    {Object.entries(restaurants[restaurant]!.promotions!).map(
-                      ([promotionId, promotion], promoIndex) => {
-                        const isPastPromotion =
-                          promotion.quantityAvailable === 0 ||
-                          new Date(promotion.endTime.seconds * 1000) <=
-                            new Date()
-
-                        if (!isPastPromotion) {
-                          return (
-                            <View key={promoIndex} sx={styles.promotionCard}>
-                              <View sx={styles.promotionLeft}>
-                                <Text>{promotion.title}</Text>
-                                <Text>{promotion.discountPercentage}% off</Text>
-                                <Text sx={styles.discount}>
-                                  {promotion.quantityAvailable} Remaining
-                                </Text>
-                              </View>
-
-                              <View sx={styles.promotionRight}>
-                                <TextButton
-                                  onPress={() =>
-                                    handleReserveButton(restaurant, promotionId)
-                                  }
-                                >
-                                  Reserve
-                                </TextButton>
-                              </View>
-                            </View>
-                          )
-                        }
-                      }
-                    )}
-                  </View>
-                )}
-              </View>
-            ))}
+              )
+            )}
         </View>
 
         {modalVisible && (
@@ -392,8 +443,7 @@ const styles = {
     borderWidth: 1,
     borderRadius: 10,
     padding: 15,
-    marginBottom: 20,
-    width: '95%',
+    marginRight: 15,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -443,6 +493,15 @@ const styles = {
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  cuisineHeader: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  restaurantImage: {
+    borderRadius: 10,
+    marginBottom: 10,
   },
   partySizeContainer: {
     flexDirection: 'row',

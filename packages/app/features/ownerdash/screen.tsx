@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'solito/router'
-import { Text, View, TextInput, useSx, Row, ScrollView, SafeAreaView } from 'dripsy'
+import {
+  Text,
+  View,
+  TextInput,
+  useSx,
+  Row,
+  ScrollView,
+  SafeAreaView,
+} from 'dripsy'
 import RNPickerSelect from 'react-native-picker-select'
 import { TouchableOpacity } from 'react-native'
 import { Bars4Icon } from 'react-native-heroicons/outline'
@@ -141,7 +149,7 @@ const RestaurantDashboard = ({
       alert('Reservation cancelled successfully')
       setReservations((prevState) => ({
         ...prevState,
-        [reservationId]: {...reservationData, cancelled: true},
+        [reservationId]: { ...reservationData, cancelled: true },
       }))
     } catch (error) {
       console.error('Error cancelling reservation:', error)
@@ -150,356 +158,359 @@ const RestaurantDashboard = ({
   }
 
   return (
-    <SafeAreaView sx={{ flex: 1, backgroundColor: '#ddf4fa' }}>
-    <ScrollView sx={styles.container} stickyHeaderIndices={[0]}>
-      <View sx={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View sx={{ flex: 1, marginRight: 10 }}>
-          {/* @ts-ignore */}
-          <RNPickerSelect
-            onValueChange={(value) => setCurrentRestaurant(value)}
-            items={Object.entries(restaurants).map(([key, restaurant]) => ({
-              label: restaurant.name,
-              value: key,
-              key: key,
-            }))}
-            value={currentRestaurant}
-            style={{
-              inputIOS: sx({
-                color: 'black',
-                fontSize: 16,
-                paddingVertical: 12,
-                paddingHorizontal: 10,
-                borderRadius: 4,
-                backgroundColor: 'white',
-                borderColor: 'gray',
-                borderWidth: 1,
-                textAlign: 'center',
-              }),
-            }}
-            placeholder={{
-              label: 'Select a Restaurant',
-              value: null,
-            }}
-          />
-        </View>
-
-        <TouchableOpacity onPress={() => setIsButtonsVisible(true)}>
-          <Bars4Icon height={24} width={24} color="black" />
-        </TouchableOpacity>
-
-        <Modal
-          animationType="slide"
-          visible={isButtonsVisible}
-          onRequestClose={() => setIsButtonsVisible(false)}
-        >
-          <View
-            sx={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            }}
-          >
-            <View
-              sx={{
-                width: 300,
-                backgroundColor: 'white',
-                padding: 20,
-                borderRadius: 10,
-              }}
-            >
-              <View sx={{ marginBottom: 20 }}>
-                <TextButton
-                  onPress={() => {
-                    setIsButtonsVisible(false)
-                    router.push('/account')
-                  }}
-                >
-                  My Account
-                </TextButton>
-              </View>
-              <View sx={{ marginBottom: 20 }}>
-                <TextButton
-                  onPress={() => {
-                    setIsButtonsVisible(false)
-                    setModalVisible(true)
-                  }}
-                >
-                  New Promotion
-                </TextButton>
-              </View>
-              <View sx={{ marginBottom: 20 }}>
-                <TextButton
-                  onPress={() => {
-                    setIsButtonsVisible(false)
-                    router.push('/register-restaurant')
-                  }}
-                >
-                  Register Restaurant
-                </TextButton>
-              </View>
-              <TextButton onPress={() => setIsButtonsVisible(false)}>
-                Close
-              </TextButton>
-            </View>
-          </View>
-        </Modal>
-      </View>
-
-      <Text sx={styles.sectionTitle}>Current Promotions</Text>
-      {promotions &&
-        Object.entries(promotions).map(([promotionId, promo], index) => {
-          const isPastPromotion =
-            promo.quantityAvailable === 0 ||
-            new Date(promo.endTime.seconds * 1000) <= new Date()
-          if (!isPastPromotion) {
-            return (
-              <View key={`promo-${index}`} style={styles.restaurantCard}>
-                <View sx={styles.cardHeader}>
-                  <Text sx={styles.restaurantName}>{promo.title}</Text>
-                  <Text sx={styles.discount}>
-                    {promo.quantityAvailable} Remaining
-                  </Text>
-                </View>
-                <Text>
-                  Start Date:{' '}
-                  {moment(promo.startTime.seconds * 1000).format(
-                    'MMMM Do YYYY, h:mm a'
-                  )}
-                </Text>
-                <Text>
-                  End Date:{' '}
-                  {moment(promo.endTime.seconds * 1000).format(
-                    'MMMM Do YYYY, h:mm a'
-                  )}
-                </Text>
-                <Text>Discount: {promo.discountPercentage}%</Text>
-                <TextButton
-                  style={styles.viewReservationsButton}
-                  onPress={() => handleViewReservations(promotionId)}
-                >
-                  View Reservations
-                </TextButton>
-              </View>
-            )
-          }
-          return null
-        })}
-
-      <Text sx={styles.sectionTitle}>Past Promotions</Text>
-      {promotions &&
-        Object.entries(promotions).map(([promotionId, promo], index) => {
-          const isPastPromotion =
-            promo.quantityAvailable === 0 ||
-            new Date(promo.endTime.seconds * 1000) <= new Date()
-          if (isPastPromotion) {
-            return (
-              <View key={index} style={styles.restaurantCard}>
-                <View sx={styles.cardHeader}>
-                  <Text sx={styles.restaurantName}>{promo.title}</Text>
-                  <Text sx={styles.discountExpired}>
-                    {promo.quantityAvailable} Remaining
-                  </Text>
-                </View>
-                <Text>
-                  Start Date:{' '}
-                  {moment(promo.startTime.seconds * 1000).format(
-                    'MMMM Do YYYY, h:mm a'
-                  )}
-                </Text>
-                <Text>
-                  End Date:{' '}
-                  {moment(promo.endTime.seconds * 1000).format(
-                    'MMMM Do YYYY, h:mm a'
-                  )}
-                </Text>
-                <Text>Discount: {promo.discountPercentage}%</Text>
-                <TextButton
-                  style={styles.viewReservationsButton}
-                  onPress={() => handleViewReservations(promotionId)}
-                >
-                  View Reservations
-                </TextButton>
-              </View>
-            )
-          }
-          return null
-        })}
-
-      <Modal
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(!modalVisible)}
-        sx={styles.modal}
+    <SafeAreaView sx={{flex: 1, backgroundColor: '#ddf4fa'}}>
+      <ScrollView
+        sx={styles.container}
+        stickyHeaderIndices={[0]}
       >
-        <View sx={styles.modalView}>
-          <Text sx={styles.inputLabel}>Restaurant</Text>
-          <RNPickerSelect
-            onValueChange={(value) => setPromoCurrentRestaurant(value)}
-            items={Object.entries(restaurants).map(([key, restaurant]) => ({
-              label: restaurant.name,
-              value: key,
-              key: key,
-            }))}
-            value={promoCurrentRestaurant}
-            style={{
-              inputIOS: sx({
-                color: 'black',
-                fontSize: 16,
-                paddingVertical: 12,
-                paddingHorizontal: 10,
-                borderRadius: 4,
-                backgroundColor: 'white',
-                borderColor: 'gray',
-                borderWidth: 1,
-                textAlign: 'center',
-              }),
-            }}
-            placeholder={{
-              label: 'Select a Restaurant',
-              value: null,
-            }}
-          />
-
-          <Text sx={styles.inputLabel}>Promotion Title</Text>
-          <TextInput
-            placeholder="Enter title"
-            placeholderTextColor="black"
-            value={promotionTitle}
-            onChangeText={setPromotionTitle}
-            sx={styles.textInput}
-          />
-
-          <Text sx={styles.inputLabel}>Discount Percentage</Text>
-          <RNPickerSelect
-            onValueChange={(value) => setDiscountPercentage(value)}
-            items={[
-              { label: '10%', value: 10 },
-              { label: '20%', value: 20 },
-              { label: '30%', value: 30 },
-              { label: '40%', value: 40 },
-              { label: '50%', value: 50 },
-            ]}
-            value={discountPercentage}
-            style={{
-              inputIOS: sx({
-                color: 'black',
-                fontSize: 16,
-                paddingVertical: 12,
-                paddingHorizontal: 10,
-                borderRadius: 4,
-                backgroundColor: 'white',
-                borderColor: 'gray',
-                borderWidth: 1,
-                textAlign: 'center',
-              }),
-            }}
-            placeholder={{
-              label: 'Select a Discount',
-              value: null,
-            }}
-          />
-
-          <Text sx={styles.inputLabel}>Discount Quantity</Text>
-          <TextInput
-            placeholder="Enter quantity"
-            placeholderTextColor="black"
-            value={discountQuantity.toString()}
-            onChangeText={(text) => setDiscountQuantity(Number(text))}
-            keyboardType="numeric"
-            sx={styles.textInput}
-          />
-
-          <Text sx={styles.inputLabel}>Promotion Date and Time</Text>
-          <View sx={{ marginBottom: 10 }}>
-            <Text sx={{ marginBottom: 10 }}>Start Time</Text>
-            <View sx={{ marginBottom: 10 }}>
-              <DateTimePicker
-                date={new Date(promotionStartTime)}
-                mode="datetime"
-                onChange={setPromotionStartTime}
-              />
-            </View>
-            <Text sx={{ marginBottom: 10 }}>End Time</Text>
-            <DateTimePicker
-              date={new Date(promotionEndTime)}
-              mode="datetime"
-              onChange={setPromotionEndTime}
+        <View sx={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View sx={{ flex: 1, marginRight: 10 }}>
+            {/* @ts-ignore */}
+            <RNPickerSelect
+              onValueChange={(value) => setCurrentRestaurant(value)}
+              items={Object.entries(restaurants).map(([key, restaurant]) => ({
+                label: restaurant.name,
+                value: key,
+                key: key,
+              }))}
+              value={currentRestaurant}
+              style={{
+                inputIOS: sx({
+                  color: 'black',
+                  fontSize: 16,
+                  paddingVertical: 12,
+                  paddingHorizontal: 10,
+                  borderRadius: 4,
+                  backgroundColor: 'white',
+                  borderColor: 'gray',
+                  borderWidth: 1,
+                  textAlign: 'center',
+                }),
+              }}
+              placeholder={{
+                label: 'Select a Restaurant',
+                value: null,
+              }}
             />
           </View>
 
-          <View sx={{ marginBottom: 10 }}>
-            <TextButton onPress={handleSavePromotion}>
-              Save Promotion
-            </TextButton>
-          </View>
+          <TouchableOpacity onPress={() => setIsButtonsVisible(true)}>
+            <Bars4Icon height={24} width={24} color="black" />
+          </TouchableOpacity>
 
-          <TextButton
-            title="Cancel"
-            onPress={() => {
-              setModalVisible(false)
-              setPromotionTitle('')
-              setDiscountPercentage(10)
-              setDiscountQuantity(1)
-              setPromotionStartTime(new Date())
-              setPromotionEndTime(new Date())
-            }}
+          <Modal
+            animationType="slide"
+            visible={isButtonsVisible}
+            onRequestClose={() => setIsButtonsVisible(false)}
           >
-            Cancel
-          </TextButton>
+            <View
+              sx={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              <View
+                sx={{
+                  width: 300,
+                  backgroundColor: 'white',
+                  padding: 20,
+                  borderRadius: 10,
+                }}
+              >
+                <View sx={{ marginBottom: 20 }}>
+                  <TextButton
+                    onPress={() => {
+                      setIsButtonsVisible(false)
+                      router.push('/account')
+                    }}
+                  >
+                    My Account
+                  </TextButton>
+                </View>
+                <View sx={{ marginBottom: 20 }}>
+                  <TextButton
+                    onPress={() => {
+                      setIsButtonsVisible(false)
+                      setModalVisible(true)
+                    }}
+                  >
+                    New Promotion
+                  </TextButton>
+                </View>
+                <View sx={{ marginBottom: 20 }}>
+                  <TextButton
+                    onPress={() => {
+                      setIsButtonsVisible(false)
+                      router.push('/register-restaurant')
+                    }}
+                  >
+                    Register Restaurant
+                  </TextButton>
+                </View>
+                <TextButton onPress={() => setIsButtonsVisible(false)}>
+                  Close
+                </TextButton>
+              </View>
+            </View>
+          </Modal>
         </View>
-      </Modal>
 
-      {reservationsModalVisible && (
-        <Modal
-          visible={reservationsModalVisible}
-          onRequestClose={() => setReservationsModalVisible(false)}
-        >
-          <View sx={styles.modalView}>
-            <Text sx={styles.titleText}>Reservations for Promotion</Text>
-            {Object.entries(reservations).map(
-              ([reservationId, reservation], index) => (
-                <View
-                  key={`reservation-${index}`}
-                  sx={styles.reservationCard}
-                  style={{
-                    backgroundColor: reservation.cancelled
-                      ? '#ffcccc'
-                      : 'white',
-                  }} // Change background color if cancelled
-                >
-                  <View sx={styles.reservationDetails}>
-                    <Text>Party Size: {reservation.partySize}</Text>
-                    <Text>
-                      Time: {formatDate(reservation.reservationTime.toDate())}
+        <Text sx={styles.sectionTitle}>Current Promotions</Text>
+        {promotions &&
+          Object.entries(promotions).map(([promotionId, promo], index) => {
+            const isPastPromotion =
+              promo.quantityAvailable === 0 ||
+              new Date(promo.endTime.seconds * 1000) <= new Date()
+            if (!isPastPromotion) {
+              return (
+                <View key={`promo-${index}`} style={styles.restaurantCard}>
+                  <View sx={styles.cardHeader}>
+                    <Text sx={styles.restaurantName}>{promo.title}</Text>
+                    <Text sx={styles.discount}>
+                      {promo.quantityAvailable} Remaining
                     </Text>
-                    {reservation.cancelled && (
-                      <Text sx={styles.cancelledText}>Cancelled</Text> // Indicate cancelled
-                    )}
                   </View>
-                  {!reservation.cancelled && (
-                    <TextButton
-                      onPress={() =>
-                        handleCancelReservation(reservationId, reservation)
-                      }
-                      style={styles.cancelButton}
-                      textProps={{ style: styles.cancelButtonText }}
-                    >
-                      Cancel
-                    </TextButton>
-                  )}
+                  <Text>
+                    Start Date:{' '}
+                    {moment(promo.startTime.seconds * 1000).format(
+                      'MMMM Do YYYY, h:mm a'
+                    )}
+                  </Text>
+                  <Text>
+                    End Date:{' '}
+                    {moment(promo.endTime.seconds * 1000).format(
+                      'MMMM Do YYYY, h:mm a'
+                    )}
+                  </Text>
+                  <Text>Discount: {promo.discountPercentage}%</Text>
+                  <TextButton
+                    style={styles.viewReservationsButton}
+                    onPress={() => handleViewReservations(promotionId)}
+                  >
+                    View Reservations
+                  </TextButton>
                 </View>
               )
-            )}
+            }
+            return null
+          })}
+
+        <Text sx={styles.sectionTitle}>Past Promotions</Text>
+        {promotions &&
+          Object.entries(promotions).map(([promotionId, promo], index) => {
+            const isPastPromotion =
+              promo.quantityAvailable === 0 ||
+              new Date(promo.endTime.seconds * 1000) <= new Date()
+            if (isPastPromotion) {
+              return (
+                <View key={index} style={styles.restaurantCard}>
+                  <View sx={styles.cardHeader}>
+                    <Text sx={styles.restaurantName}>{promo.title}</Text>
+                    <Text sx={styles.discountExpired}>
+                      {promo.quantityAvailable} Remaining
+                    </Text>
+                  </View>
+                  <Text>
+                    Start Date:{' '}
+                    {moment(promo.startTime.seconds * 1000).format(
+                      'MMMM Do YYYY, h:mm a'
+                    )}
+                  </Text>
+                  <Text>
+                    End Date:{' '}
+                    {moment(promo.endTime.seconds * 1000).format(
+                      'MMMM Do YYYY, h:mm a'
+                    )}
+                  </Text>
+                  <Text>Discount: {promo.discountPercentage}%</Text>
+                  <TextButton
+                    style={styles.viewReservationsButton}
+                    onPress={() => handleViewReservations(promotionId)}
+                  >
+                    View Reservations
+                  </TextButton>
+                </View>
+              )
+            }
+            return null
+          })}
+
+        <Modal
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(!modalVisible)}
+          sx={styles.modal}
+        >
+          <View sx={styles.modalView}>
+            <Text sx={styles.inputLabel}>Restaurant</Text>
+            <RNPickerSelect
+              onValueChange={(value) => setPromoCurrentRestaurant(value)}
+              items={Object.entries(restaurants).map(([key, restaurant]) => ({
+                label: restaurant.name,
+                value: key,
+                key: key,
+              }))}
+              value={promoCurrentRestaurant}
+              style={{
+                inputIOS: sx({
+                  color: 'black',
+                  fontSize: 16,
+                  paddingVertical: 12,
+                  paddingHorizontal: 10,
+                  borderRadius: 4,
+                  backgroundColor: 'white',
+                  borderColor: 'gray',
+                  borderWidth: 1,
+                  textAlign: 'center',
+                }),
+              }}
+              placeholder={{
+                label: 'Select a Restaurant',
+                value: null,
+              }}
+            />
+
+            <Text sx={styles.inputLabel}>Promotion Title</Text>
+            <TextInput
+              placeholder="Enter title"
+              placeholderTextColor="black"
+              value={promotionTitle}
+              onChangeText={setPromotionTitle}
+              sx={styles.textInput}
+            />
+
+            <Text sx={styles.inputLabel}>Discount Percentage</Text>
+            <RNPickerSelect
+              onValueChange={(value) => setDiscountPercentage(value)}
+              items={[
+                { label: '10%', value: 10 },
+                { label: '20%', value: 20 },
+                { label: '30%', value: 30 },
+                { label: '40%', value: 40 },
+                { label: '50%', value: 50 },
+              ]}
+              value={discountPercentage}
+              style={{
+                inputIOS: sx({
+                  color: 'black',
+                  fontSize: 16,
+                  paddingVertical: 12,
+                  paddingHorizontal: 10,
+                  borderRadius: 4,
+                  backgroundColor: 'white',
+                  borderColor: 'gray',
+                  borderWidth: 1,
+                  textAlign: 'center',
+                }),
+              }}
+              placeholder={{
+                label: 'Select a Discount',
+                value: null,
+              }}
+            />
+
+            <Text sx={styles.inputLabel}>Discount Quantity</Text>
+            <TextInput
+              placeholder="Enter quantity"
+              placeholderTextColor="black"
+              value={discountQuantity.toString()}
+              onChangeText={(text) => setDiscountQuantity(Number(text))}
+              keyboardType="numeric"
+              sx={styles.textInput}
+            />
+
+            <Text sx={styles.inputLabel}>Promotion Date and Time</Text>
+            <View sx={{ marginBottom: 10 }}>
+              <Text sx={{ marginBottom: 10 }}>Start Time</Text>
+              <View sx={{ marginBottom: 10 }}>
+                <DateTimePicker
+                  date={new Date(promotionStartTime)}
+                  mode="datetime"
+                  onChange={setPromotionStartTime}
+                />
+              </View>
+              <Text sx={{ marginBottom: 10 }}>End Time</Text>
+              <DateTimePicker
+                date={new Date(promotionEndTime)}
+                mode="datetime"
+                onChange={setPromotionEndTime}
+              />
+            </View>
+
+            <View sx={{ marginBottom: 10 }}>
+              <TextButton onPress={handleSavePromotion}>
+                Save Promotion
+              </TextButton>
+            </View>
+
             <TextButton
-              onPress={() => setReservationsModalVisible(false)}
-              style={styles.viewReservationsButton}
+              title="Cancel"
+              onPress={() => {
+                setModalVisible(false)
+                setPromotionTitle('')
+                setDiscountPercentage(10)
+                setDiscountQuantity(1)
+                setPromotionStartTime(new Date())
+                setPromotionEndTime(new Date())
+              }}
             >
-              Close
+              Cancel
             </TextButton>
           </View>
         </Modal>
-      )}
-    </ScrollView>
+
+        {reservationsModalVisible && (
+          <Modal
+            visible={reservationsModalVisible}
+            onRequestClose={() => setReservationsModalVisible(false)}
+          >
+            <View sx={styles.modalView}>
+              <Text sx={styles.titleText}>Reservations for Promotion</Text>
+              {Object.entries(reservations).map(
+                ([reservationId, reservation], index) => (
+                  <View
+                    key={`reservation-${index}`}
+                    sx={styles.reservationCard}
+                    style={{
+                      backgroundColor: reservation.cancelled
+                        ? '#ffcccc'
+                        : 'white',
+                    }} // Change background color if cancelled
+                  >
+                    <View sx={styles.reservationDetails}>
+                      <Text>Party Size: {reservation.partySize}</Text>
+                      <Text>
+                        Time: {formatDate(reservation.reservationTime.toDate())}
+                      </Text>
+                      {reservation.cancelled && (
+                        <Text sx={styles.cancelledText}>Cancelled</Text> // Indicate cancelled
+                      )}
+                    </View>
+                    {!reservation.cancelled && (
+                      <TextButton
+                        onPress={() =>
+                          handleCancelReservation(reservationId, reservation)
+                        }
+                        style={styles.cancelButton}
+                        textProps={{ style: styles.cancelButtonText }}
+                      >
+                        Cancel
+                      </TextButton>
+                    )}
+                  </View>
+                )
+              )}
+              <TextButton
+                onPress={() => setReservationsModalVisible(false)}
+                style={styles.viewReservationsButton}
+              >
+                Close
+              </TextButton>
+            </View>
+          </Modal>
+        )}
+      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -595,6 +606,7 @@ const styles = {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    marginTop: 10,
   },
   promotionCard: {
     borderWidth: 1,

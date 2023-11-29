@@ -45,7 +45,7 @@ const AccountScreen = () => {
           console.error('Error fetching restaurants: ', error)
         })
     }
-  }, [currentUser, userDetails])
+  }, [currentUser])
 
   const handleCancelReservation = async (reservationId, reservationData) => {
     try {
@@ -62,8 +62,12 @@ const AccountScreen = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#ddf4fa' }}>
-      <ScrollView sx={styles.container}>
+    <SafeAreaView sx={{ backgroundColor: '#ddf4fa', flex: 1 }}>
+      <ScrollView
+        style={{ backgroundColor: '#ddf4fa' }}
+        sx={styles.container}
+        stickyHeaderIndices={[0]}
+      >
         <Text sx={styles.header}>Account Information</Text>
 
         <View sx={styles.infoContainer}>

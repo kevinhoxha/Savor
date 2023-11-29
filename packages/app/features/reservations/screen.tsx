@@ -49,8 +49,8 @@ const ReservationScreen = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#ddf4fa' }}>
-      <ScrollView sx={styles.container}>
+    <SafeAreaView sx={{ backgroundColor: '#ddf4fa', flex: 1 }}>
+      <ScrollView style={{ backgroundColor: '#ddf4fa' }} sx={styles.container}>
         <View>
           <Text sx={styles.subheader}>Upcoming Reservations:</Text>
           {Object.entries(reservations).map(([id, reservation], index) => {

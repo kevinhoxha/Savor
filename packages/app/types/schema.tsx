@@ -15,6 +15,7 @@ export type Restaurant = {
   name: string
   ownerId: string
   promotions?: Record<string, Promotion>
+  id?: string // if restaurant id is needed
 }
 
 export type Reservation = {

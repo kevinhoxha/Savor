@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'solito/router'
-import { Text, View, TextInput, useSx, SafeAreaView } from 'dripsy'
+import { Text, View, TextInput, useSx, SafeAreaView, ScrollView } from 'dripsy'
 import { useAuth } from 'app/context/AuthContext'
 import { Picker } from '@react-native-picker/picker'
 import RNPickerSelect from 'react-native-picker-select'
@@ -44,7 +44,10 @@ function RegisterPage() {
   }
 
   return (
-    <SafeAreaView sx={styles.container}>
+    <ScrollView
+      style={{ backgroundColor: '#ddf4fa' }}
+      contentContainerSx={styles.container}
+    >
       <Image
         source={{ uri: 'https://i.imgur.com/J2ojaVm.jpeg' }}
         width={325}
@@ -121,7 +124,7 @@ function RegisterPage() {
           <ButtonLink href="/login">Login</ButtonLink>
         </View>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   )
 }
 

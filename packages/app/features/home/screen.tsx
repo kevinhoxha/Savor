@@ -1,17 +1,16 @@
-import { useSx, View, Text, SafeAreaView} from 'dripsy'
+import { useSx, View, Text, SafeAreaView } from 'dripsy'
 import { ButtonLink } from 'app/components/Button'
 import { SolitoImage } from 'solito/image'
 import logo from './assets/logo.jpg'
-import {Image} from 'react-native'
-
+import { Image } from 'react-native'
 
 export function HomeScreen() {
   const sx = useSx()
 
   return (
     <SafeAreaView sx={styles.container}>
-      <Image
-        source={{ uri: 'https://i.imgur.com/J2ojaVm.jpeg' }}
+      <SolitoImage
+        src={logo}
         width={325}
         height={325}
         onLayout={() => {}}
@@ -20,7 +19,7 @@ export function HomeScreen() {
       />
 
       <Text sx={styles.sectionTitle}>Dine for less, today</Text>
-      <View sx={{flex: 1, gap: 40, flexDirection: "column"}}>
+      <View sx={{ flex: 1, gap: 40, flexDirection: 'column' }}>
         <ButtonLink href="/login">Login</ButtonLink>
         <ButtonLink href="/register">Register</ButtonLink>
       </View>
@@ -50,7 +49,7 @@ const styles = {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 30,
-    color: '#014c73'
+    color: '#014c73',
   },
 }
 
