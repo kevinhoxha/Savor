@@ -35,6 +35,12 @@ function RegisterRestaurantScreen() {
       try {
         await saveRestaurant(currentUser.uid, restaurantData);
         console.log('Restaurant registration successful');
+        setRestaurantName('');
+        setAddress('');
+        setCity('');
+        setState('');
+        setZip('');
+        setCuisine('');
         router.push("/ownerdash")
       } catch (error) {
         console.error('Error registering restaurant:', error);
