@@ -163,16 +163,25 @@ const UserDashboardScreen = ({
               justifyContent: 'space-evenly',
             }}
           >
-            <Text>Hello, {userDetails?.firstName}! </Text>
-            <View>
-              <Text>Location:</Text>
+            <Text sx={styles.welcomeText}>Hello, {userDetails?.firstName}! </Text>
+            <View sx={styles.locationContainer}>
+              <Text sx = {styles.locationText}>Location:  </Text>
               <RNPickerSelect
                 onValueChange={(value) => setSelectedLocation(value)}
                 items={uniqueLocations.map((location) => ({
                   label: location,
                   value: location,
                 }))}
-                placeholder={{ label: 'Select a location', value: null }}
+                style={{
+                  inputIOS: ({
+                    color: 'black',
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    paddingVertical: 6,
+                    textAlign: 'center',
+                  }),
+                }}
+                placeholder={{ label: 'Select a location', value: null}}
                 value={selectedLocation}
               />
             </View>
@@ -521,6 +530,20 @@ const styles = {
     paddingHorizontal: 1,
     marginBottom: 10,
   },
+  welcomeText: {
+    fontSize: 14,
+    paddingVertical: 6,
+    fontWeight: 'bold',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+
 }
 
 export default UserDashboardScreen
