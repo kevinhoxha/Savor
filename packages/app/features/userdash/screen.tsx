@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'solito/router'
 import Modal from 'app/components/Modal'
-import { Text, View, TextInput, ScrollView, SafeAreaView } from 'dripsy'
+import { Text, View, TextInput, ScrollView, SafeAreaView, Image, Row } from 'dripsy'
 import {
   saveReservation,
   fetchRestaurantsWithPromotions,
@@ -19,8 +19,9 @@ import {
 } from 'app/utils/helperFunctions'
 import { SearchBar } from 'react-native-elements'
 import RNPickerSelect from 'react-native-picker-select'
-import { Image, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { SolitoImage } from 'solito/image'
+import { images } from 'app/utils/helperFunctions'
 
 const UserDashboardScreen = ({
   DateTimePicker,
@@ -152,7 +153,7 @@ const UserDashboardScreen = ({
   const groupedRestaurants = groupRestaurantsByCuisine(filteredRestaurants)
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView sx={styles.container}>
       <ScrollView stickyHeaderIndices={[0]}>
         <View sx={styles.header}>
           <View
@@ -220,12 +221,11 @@ const UserDashboardScreen = ({
                     {restaurants.map((restaurant, index) => (
                       <View key={index} sx={styles.restaurantCard}>
                         {restaurant && ( // normally should be a uri link but this works for now
-                          <SolitoImage
-                            src={`./assets/restaurants/${restaurant.id}.jpg`}
-                            style={styles.restaurantImage}
-                            width={300}
-                            height={200}
+                          <Image
+                            source={images[restaurant.id!]}
+                            sx={styles.restaurantImage}
                             alt={restaurant.name}
+                            resizeMode="cover"
                           />
                         )}
                         <View sx={styles.cardHeader}>
@@ -237,9 +237,6 @@ const UserDashboardScreen = ({
                             </Text>
                           </TouchableOpacity>
                         </View>
-                        <Text sx={styles.restaurantInfo}>
-                          {restaurant.address.city}
-                        </Text>
 
                         {/* Display active promotions for the current restaurant */}
                         {restaurant.promotions && (
@@ -258,18 +255,20 @@ const UserDashboardScreen = ({
 
                                 if (!isPastPromotion) {
                                   return (
-                                    <View
+                                    <Row
                                       key={promoIndex}
-                                      sx={styles.promotionCard}
+                                      // sx={styles.promotionCard}
                                     >
                                       <View sx={styles.promotionLeft}>
-                                        <Text>{promotion.title}</Text>
+                                        <Text sx={styles.locationText}>
+                                          {restaurant.address.city}, {restaurant.address.state}
+                                        </Text>
                                         <Text>
                                           {promotion.discountPercentage}% off
                                         </Text>
                                         <Text sx={styles.discount}>
                                           {promotion.quantityAvailable}{' '}
-                                          Remaining
+                                          available
                                         </Text>
                                       </View>
 
@@ -277,7 +276,7 @@ const UserDashboardScreen = ({
                                         <TextButton
                                           onPress={() =>
                                             handleReserveButton(
-                                              restaurant,
+                                              restaurant.id,
                                               promotionId
                                             )
                                           }
@@ -285,7 +284,7 @@ const UserDashboardScreen = ({
                                           Reserve
                                         </TextButton>
                                       </View>
-                                    </View>
+                                    </Row>
                                   )
                                 }
                               }
@@ -481,6 +480,7 @@ const styles = {
     justifyContent: 'space-between', // Align left and right sides
   },
   promotionLeft: {
+    marginTop: 5,
     flex: 1, // Take up the available space on the left side
   },
   promotionRight: {
@@ -511,6 +511,9 @@ const styles = {
   restaurantImage: {
     borderRadius: 10,
     marginBottom: 10,
+    height: 150,
+    minWidth: 250,
+    width: "auto"
   },
   partySizeContainer: {
     flexDirection: 'row',
