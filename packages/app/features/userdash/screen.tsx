@@ -3,7 +3,15 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'solito/router'
 import Modal from 'app/components/Modal'
-import { Text, View, TextInput, ScrollView, SafeAreaView, Image, Row } from 'dripsy'
+import {
+  Text,
+  View,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  Image,
+  Row,
+} from 'dripsy'
 import {
   saveReservation,
   fetchRestaurantsWithPromotions,
@@ -164,9 +172,11 @@ const UserDashboardScreen = ({
               justifyContent: 'space-evenly',
             }}
           >
-            <Text sx={styles.welcomeText}>Hello, {userDetails?.firstName}! </Text>
+            <Text sx={styles.welcomeText}>
+              Hello, {userDetails?.firstName}!{' '}
+            </Text>
             <View sx={styles.locationContainer}>
-              <Text sx = {styles.locationText}>Location:  </Text>
+              <Text sx={styles.locationText}>Location: </Text>
               <RNPickerSelect
                 onValueChange={(value) => setSelectedLocation(value)}
                 items={uniqueLocations.map((location) => ({
@@ -174,15 +184,15 @@ const UserDashboardScreen = ({
                   value: location,
                 }))}
                 style={{
-                  inputIOS: ({
+                  inputIOS: {
                     color: 'black',
                     fontSize: 14,
                     fontWeight: 'bold',
                     paddingVertical: 6,
                     textAlign: 'center',
-                  }),
+                  },
                 }}
-                placeholder={{ label: 'Select a location', value: null}}
+                placeholder={{ label: 'Select a location', value: null }}
                 value={selectedLocation}
               />
             </View>
@@ -208,7 +218,7 @@ const UserDashboardScreen = ({
             }}
           />
         </View>
-        <View sx={{ alignItems: 'center', gap: 15 }}>
+        <View sx={{ gap: 15 }}>
           {groupedRestaurants &&
             Object.entries(groupedRestaurants).map(
               ([cuisine, restaurants]: [string, Restaurant[]]) => (
@@ -221,16 +231,17 @@ const UserDashboardScreen = ({
                     {restaurants.map((restaurant, index) => (
                       <View key={index} sx={styles.restaurantCard}>
                         {restaurant && ( // normally should be a uri link but this works for now
-                          <Image
-                            source={images[restaurant.id!]}
-                            sx={styles.restaurantImage}
+                          <SolitoImage
+                            src={images[restaurant.id!]}
+                            style={styles.restaurantImage}
                             alt={restaurant.name}
-                            resizeMode="cover"
+                            height={150}
+                            contentFit="cover"
                           />
                         )}
                         <View sx={styles.cardHeader}>
                           <TouchableOpacity
-                            onPress={() => handleRestInfo(restaurant)}
+                            onPress={() => handleRestInfo(restaurant.id!)}
                           >
                             <Text sx={styles.restaurantName}>
                               {restaurant.name}
@@ -241,9 +252,7 @@ const UserDashboardScreen = ({
                         {/* Display active promotions for the current restaurant */}
                         {restaurant.promotions && (
                           <View>
-                            {Object.entries(
-                              restaurant.promotions!
-                            ).map(
+                            {Object.entries(restaurant.promotions!).map(
                               (
                                 [promotionId, promotion]: [string, Promotion],
                                 promoIndex
@@ -261,7 +270,8 @@ const UserDashboardScreen = ({
                                     >
                                       <View sx={styles.promotionLeft}>
                                         <Text sx={styles.locationText}>
-                                          {restaurant.address.city}, {restaurant.address.state}
+                                          {restaurant.address.city},{' '}
+                                          {restaurant.address.state}
                                         </Text>
                                         <Text>
                                           {promotion.discountPercentage}% off
@@ -321,7 +331,7 @@ const UserDashboardScreen = ({
 
               <View sx={styles.partySizeContainer}>
                 <TextButton
-                style = {{paddingX: 12, paddingY: 8, marginBottom: 10}}
+                  style={{ paddingX: 12, paddingY: 8, marginBottom: 10 }}
                   onPress={() => setPartySize(Math.max(1, partySize - 1))}
                 >
                   -
@@ -333,7 +343,7 @@ const UserDashboardScreen = ({
                   keyboardType="numeric"
                 />
                 <TextButton
-                style = {{paddingX: 12, paddingY: 8, marginBottom: 10}}
+                  style={{ paddingX: 12, paddingY: 8, marginBottom: 10 }}
                   onPress={() =>
                     setPartySize(
                       Math.min(
@@ -351,13 +361,16 @@ const UserDashboardScreen = ({
               </View>
 
               <DateTimePicker
-                style = {{marginBottom: 10, backgroundColor: 'white'}}
+                style={{ marginBottom: 10, backgroundColor: 'white' }}
                 date={reservationTime}
                 mode="datetime"
                 onChange={(date) => handleDateTimeChange(date)}
               />
 
-              <TextButton style = {{marginBottom: 10}} onPress={handleConfirmReservation}>
+              <TextButton
+                style={{ marginBottom: 10 }}
+                onPress={handleConfirmReservation}
+              >
                 Confirm Reservation
               </TextButton>
 
@@ -511,9 +524,7 @@ const styles = {
   restaurantImage: {
     borderRadius: 10,
     marginBottom: 10,
-    height: 150,
     minWidth: 250,
-    width: "auto"
   },
   partySizeContainer: {
     flexDirection: 'row',
@@ -546,7 +557,6 @@ const styles = {
     fontSize: 14,
     fontWeight: 'bold',
   },
-
 }
 
 export default UserDashboardScreen

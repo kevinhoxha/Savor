@@ -17,6 +17,60 @@ import {
   increment,
 } from 'firebase/firestore'
 
+import cache from './cache'
+
+const getDocWithCache = async (docRef) => {
+  const cachedData = await cache.get(docRef.path)
+  if (cachedData) {
+    return cachedData
+  }
+
+  const docSnap = await getDoc(docRef)
+  if (docSnap.exists()) {
+    const updatedCacheData = {
+      exists: () => true,
+      data: () => docSnap.data(),
+      id: docRef.id,
+    }
+    await cache.set(docRef.path, updatedCacheData)
+    return updatedCacheData
+  }
+
+  return null
+}
+
+const setDocWithCache = async (docRef, data) => {
+  await setDoc(docRef, data)
+  await cache.set(docRef.path, {
+    exists: () => true,
+    data: () => data,
+    id: docRef.id,
+  })
+}
+
+const addDocWithCache = async (collectionRef, data) => {
+  const docRef = await addDoc(collectionRef, data)
+  await cache.set(docRef.path, {
+    exists: () => true,
+    data: () => data,
+    id: docRef.id,
+  })
+  return docRef
+}
+
+const updateDocWithCache = async (docRef, data) => {
+  await updateDoc(docRef, data)
+  let cachedData = await cache.get(cacheKey)
+  if (cachedData) {
+    const updatedCacheData = { ...cachedData, ...data }
+    await cache.set(cacheKey, {
+      exists: () => true,
+      data: () => updatedCacheData,
+      id: docRef.id,
+    })
+  }
+}
+
 export const registerUser = async ({
   email,
   password,
@@ -36,7 +90,7 @@ export const registerUser = async ({
 
     // Save additional user details in Firestore
     const userRef = doc(db, 'users', user.uid)
-    await setDoc(userRef, {
+    await setDocWithCache(userRef, {
       email,
       firstName,
       lastName,
@@ -80,9 +134,8 @@ export const loginUser = async (email, password) => {
     const user = userCredential.user
 
     // Retrieve user type from Firestore
-    const userRef = doc(db, 'users', user.uid) // Adjusted this
-    const userDoc = await getDoc(userRef) // Adjusted this
-    const userDetails = userDoc.data()
+    const userRef = doc(db, 'users', user.uid)
+    const userDetails = (await getDocWithCache(userRef)).data()
 
     return { user, userDetails }
   } catch (error) {
@@ -103,20 +156,24 @@ export const signOutUser = async () => {
 async function fetchCollection(collectionRef, isSubCollection = false) {
   try {
     const querySnapshot = await getDocs(collectionRef)
-    let collection = {}
-
-    for (const docRef of querySnapshot.docs) {
+    let docsPromises = querySnapshot.docs.map((docRef) => {
       if (isSubCollection) {
-        const doc = await getDoc(docRef.data().ref)
-        if (doc.exists()) {
-          collection[doc.id] = doc.data()
-        }
+        return getDocWithCache(docRef.data().ref)
+          .then((doc) => (doc.exists() ? [doc.id, doc.data()] : null))
+          .catch((error) => {
+            console.error(
+              'Error fetching subcollection document:',
+              error.message
+            )
+            return null
+          })
       } else {
-        collection[docRef.id] = docRef.data()
+        return Promise.resolve([docRef.id, docRef.data()])
       }
-    }
+    })
+    let docs = await Promise.all(docsPromises)
 
-    return collection
+    return Object.fromEntries(docs.filter((doc) => doc !== null))
   } catch (error) {
     console.error('Error fetching collection:', error.message)
     throw error
@@ -129,12 +186,14 @@ async function saveDocumentWithSubCollection(
   subCollectionRefs
 ) {
   try {
-    const docRef = await addDoc(mainCollectionRef, data)
-    for (const subCollectionRef of subCollectionRefs) {
-      await setDoc(doc(subCollectionRef, docRef.id), {
-        ref: docRef,
+    const docRef = await addDocWithCache(mainCollectionRef, data)
+    await Promise.all(
+      subCollectionRefs.map(async (subCollectionRef) => {
+        await setDocWithCache(doc(subCollectionRef, docRef.id), {
+          ref: docRef,
+        })
       })
-    }
+    )
 
     return docRef
   } catch (error) {
@@ -170,7 +229,6 @@ export const fetchRestaurantsByUser = async (userId) => {
 
 export const savePromotion = async (promotionData) => {
   const promotionRef = collection(db, 'promotions')
-  console.log(promotionData)
   const restaurantPromotionsRef = collection(
     db,
     'restaurants',
@@ -185,7 +243,7 @@ export const savePromotion = async (promotionData) => {
 
 export const updatePromotion = async (promotionId, promotionData) => {
   const promotionRef = doc(db, 'promotions', promotionId)
-  await setDoc(promotionRef, promotionData, { merge: true })
+  await updateDocWithCache(promotionRef, promotionData)
 }
 
 export const saveReservation = async (reservationData) => {
@@ -222,8 +280,8 @@ export const fetchReservationsByUserWithRestaurantData = async (userId) => {
   const updatedReservations = {}
   for (const [id, reservation] of Object.entries(reservations)) {
     const restaurantRef = doc(db, 'restaurants', reservation.restaurantId)
-    const restaurantSnap = await getDoc(restaurantRef)
-    if (restaurantSnap.exists()) {
+    const restaurantSnap = await getDocWithCache(restaurantRef)
+    if (restaurantSnap) {
       updatedReservations[id] = {
         ...reservation,
         restaurantData: restaurantSnap.data(),
@@ -271,6 +329,7 @@ export const fetchRestaurantsWithPromotions = async () => {
         const restaurantPromotions = await fetchPromotionsByRestaurant(
           restaurant
         )
+
         return [
           restaurant,
           { ...restaurantData, promotions: restaurantPromotions },
@@ -290,7 +349,7 @@ export const fetchReservationsByUser = async (userId) => {
 export const updateReservation = async (reservationId, reservationData) => {
   try {
     const reservationRef = doc(db, 'reservations', reservationId)
-    await updateDoc(reservationRef, reservationData)
+    await updateDocWithCache(reservationRef, reservationData)
   } catch (error) {
     console.error('Error cancelling reservation:', error)
     throw error

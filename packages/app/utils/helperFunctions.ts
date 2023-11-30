@@ -1,4 +1,5 @@
 import { Restaurant } from 'app/types/schema'
+import { Timestamp } from 'firebase/firestore'
 import moment from 'moment'
 
 export const formatDate = (date: Date) => {
@@ -21,6 +22,28 @@ export function groupRestaurantsByCuisine(restaurants) {
 
   return grouped
 }
+
+export const convertTimestamps = (data) => {
+  const newData = {...data.data()};
+  Object.keys(newData).forEach(key => {
+    if (newData[key] instanceof Timestamp) {
+      newData[key] = newData[key].toDate().toISOString();
+    }
+  });
+
+  return {...data, data: newData};
+};
+
+export const revertTimestamps = (data) => {
+  const newData = {...data["data"]};
+  Object.keys(newData).forEach(key => {
+    if (typeof newData[key] === 'string' && newData[key].endsWith('Z')) {
+      newData[key] = Timestamp.fromDate(new Date(newData[key]));
+    }
+  });
+  
+  return {...data, data: newData};
+};
 
 export const images = {
   '1mUlG9w2FKGVJnQ8zMju': require('./assets/restaurants/1mUlG9w2FKGVJnQ8zMju.jpg'),
