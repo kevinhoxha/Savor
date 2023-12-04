@@ -258,6 +258,7 @@ const UserDashboardScreen = ({
                                 promoIndex
                               ) => {
                                 const isPastPromotion =
+                                  !promotion.endTime ||
                                   promotion.quantityAvailable === 0 ||
                                   new Date(promotion.endTime.seconds * 1000) <=
                                     new Date()
