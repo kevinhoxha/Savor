@@ -60,10 +60,11 @@ const addDocWithCache = async (collectionRef, data) => {
 
 const updateDocWithCache = async (docRef, data) => {
   await updateDoc(docRef, data)
-  let cachedData = await cache.get(cacheKey)
+  let cachedData = await cache.get(docRef.path)
   if (cachedData) {
     const updatedCacheData = { ...cachedData, ...data }
-    await cache.set(cacheKey, {
+
+    await cache.set(docRef.path, {
       exists: () => true,
       data: () => updatedCacheData,
       id: docRef.id,
