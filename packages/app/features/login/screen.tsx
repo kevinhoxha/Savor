@@ -11,7 +11,8 @@ import {
 import { ButtonLink, TextButton } from 'app/components/Button'
 import { useAuth } from 'app/context/AuthContext'
 import { useRouter } from 'solito/router'
-import { Image } from 'react-native'
+import logo from './assets/logo.jpg'
+import { SolitoImage } from 'solito/image'
 
 function LoginScreen() {
   const [email, setEmail] = useState('')
@@ -40,8 +41,8 @@ function LoginScreen() {
       style={{ backgroundColor: '#ddf4fa' }}
       contentContainerSx={styles.container}
     >
-      <Image
-        source={{ uri: 'https://i.imgur.com/J2ojaVm.jpeg' }}
+      <SolitoImage
+        src={logo}
         width={325}
         height={325}
         onLayout={() => {}}
